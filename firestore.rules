@@ -42,11 +42,11 @@ service cloud.firestore {
 
       // ADMIN READ: Only authenticated admin can read letters.
       allow read: if request.auth != null
-        && request.auth.token.email == "valleypostoffice@admin.com";
+        && request.auth.uid == "JtTsdNnL2JQ2elPmBGsWx9opARm1";
 
       // ADMIN UPDATE: Only admin can mark letters as read.
       allow update: if request.auth != null
-        && request.auth.token.email == "valleypostoffice@admin.com"
+        && request.auth.uid == "JtTsdNnL2JQ2elPmBGsWx9opARm1"
         // Only the 'read' field can be changed
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
         && request.resource.data.read is bool;
