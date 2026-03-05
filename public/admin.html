@@ -1,672 +1,824 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Valley Post Office — Admin</title>
-    <meta name="robots" content="noindex, nofollow" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valley Post Office — Admin</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <style>
+    /* ================================================================
+       ROOT TOKENS
+    ================================================================ */
+    :root {
+      --sdv-parch: #fdedc4;
+      --sdv-parch-dark: #e6c891;
+      --sdv-parch-deep: #cc9959;
+      --sdv-ink: #3a2010;
+      --sdv-grass: #5aac2c;
+      --sdv-grass-dark: #3d7d18;
+      --sdv-grass-mid: #4c9424;
+      --sdv-hill: #2e6014;
+      --sdv-brown1: #6b3a1f;
+      --sdv-brown2: #8b5530;
+      --sdv-brown3: #b87840;
+      --sdv-gold: #f0c050;
+      --sdv-gold-dark: #c08030;
+      --sdv-gold-hi: #ffe870;
+      --sdv-border: #422811;
+      --sdv-border-inset: #ffeccc;
+      --sdv-red: #d13030;
+      --sdv-green: #5aac2c;
+      --fp: "Press Start 2P", monospace;
+    }
 
-    <style>
-        :root {
-            --sdv-parch: #fdedc4;
-            --sdv-parch-dark: #e6c891;
-            --sdv-parch-deep: #cc9959;
-            --sdv-ink: #3a2010;
-            --sdv-brown1: #6b3a1f;
-            --sdv-brown2: #8b5530;
-            --sdv-brown3: #b87840;
-            --sdv-gold: #f0c050;
-            --sdv-gold-dark: #c08030;
-            --sdv-border: #422811;
-            --sdv-border-inset: #ffeccc;
-            --sdv-red: #d13030;
-            --sdv-green: #5aac2c;
-            --fp: "Press Start 2P", monospace;
-        }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    body {
+      font-family: var(--fp);
+      background: #1a0e05;
+      min-height: 100vh;
+      overflow-x: hidden;
+      image-rendering: pixelated;
+      -webkit-font-smoothing: none;
+    }
 
-        body {
-            font-family: var(--fp);
-            background: #1a0e05;
-            min-height: 100vh;
-            image-rendering: pixelated;
-            -webkit-font-smoothing: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--sdv-ink);
-        }
+    /* ── Scene Background ── */
+    .sky {
+      position: fixed; top: 0; left: 0; right: 0; height: 100vh; z-index: 0;
+      background: linear-gradient(180deg, #2a1a3a 0%, #4a2a50 10%, #8a3a2a 28%,
+        #c46030 45%, #e8903a 60%, #f4c060 75%, #d4a040 100%);
+    }
+    .stars { position: fixed; top: 0; left: 0; right: 0; height: 55%; z-index: 1; pointer-events: none; }
+    .star {
+      position: absolute; background: #fff; image-rendering: pixelated;
+      animation: twinkle var(--dur, 2s) ease-in-out infinite var(--del, 0s);
+    }
+    @keyframes twinkle { 0%, 100% { opacity: .9 } 50% { opacity: .1 } }
 
-        /* ═══════════════════════════════════════════
-       LOGIN GATE
-    ═══════════════════════════════════════════ */
-        .login-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 100;
-            background: linear-gradient(180deg, #2a1a3a 0%, #4a2a50 20%, #8a3a2a 50%, #c46030 70%, #e8903a 85%, #f4c060 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity .5s ease;
-        }
+    .sun {
+      position: fixed; right: 12%; top: 8%; width: 40px; height: 40px; z-index: 2;
+      image-rendering: pixelated; animation: sunFloat 8s ease-in-out infinite;
+    }
+    @keyframes sunFloat { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
 
-        .login-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
+    .mountains { position: fixed; bottom: 0; left: 0; right: 0; height: 45%; z-index: 3; pointer-events: none; }
 
-        .login-box {
-            background: var(--sdv-parch);
-            border: 6px solid var(--sdv-border);
-            border-radius: 4px;
-            box-shadow: inset 4px 4px 0 var(--sdv-border-inset), inset -4px -4px 0 var(--sdv-parch-dark), 6px 6px 0 rgba(0, 0, 0, 0.5);
-            padding: 0;
-            width: 90%;
-            max-width: 400px;
-            animation: dialogRise .5s cubic-bezier(.22, .68, 0, 1.2) both;
-        }
+    .ground-far {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 32%; z-index: 4;
+      background-color: var(--sdv-hill); border-top: 4px solid #1e4008;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='%232e6014'/%3E%3Crect width='4' height='4' fill='%23234d0e'/%3E%3Crect x='4' y='4' width='4' height='4' fill='%23234d0e'/%3E%3C/svg%3E");
+    }
+    .ground-mid {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 20%; z-index: 5;
+      background-color: var(--sdv-grass-dark); border-top: 4px solid #1a3205;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='%233d7d18'/%3E%3Crect width='4' height='4' fill='%23326b12'/%3E%3Crect x='4' y='4' width='4' height='4' fill='%23326b12'/%3E%3C/svg%3E");
+    }
+    .ground-near {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 10%; z-index: 6;
+      background-color: var(--sdv-grass); border-top: 4px solid var(--sdv-grass-dark);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='8' height='8' fill='%235aac2c'/%3E%3Crect width='4' height='4' fill='%234c9424'/%3E%3Crect x='4' y='4' width='4' height='4' fill='%234c9424'/%3E%3C/svg%3E");
+    }
+    .leaves-layer { position: fixed; inset: 0; z-index: 10; pointer-events: none; overflow: hidden; }
+    .leaf {
+      position: absolute; top: -40px; font-size: 14px; opacity: .7;
+      animation: leafFall linear infinite var(--del, 0s);
+      animation-duration: var(--dur, 7s);
+      filter: sepia(.4) saturate(1.5);
+    }
+    @keyframes leafFall {
+      0%   { transform: translateY(-40px) rotate(0deg) translateX(0); }
+      25%  { transform: translateY(25vh) rotate(90deg) translateX(30px); }
+      50%  { transform: translateY(50vh) rotate(180deg) translateX(-20px); }
+      75%  { transform: translateY(75vh) rotate(270deg) translateX(40px); }
+      100% { transform: translateY(105vh) rotate(360deg) translateX(-10px); }
+    }
+    .deco-tree {
+      position: fixed; bottom: 8%; width: clamp(50px, 7vw, 90px); z-index: 8;
+      image-rendering: pixelated; filter: drop-shadow(4px 0 0 rgba(0,0,0,.3));
+    }
+    .deco-tree-l { left: 0; }
+    .deco-tree-r { right: 0; transform: scaleX(-1); }
 
-        .login-header {
-            background: var(--sdv-brown2);
-            border: 4px solid var(--sdv-border);
-            box-shadow: inset 4px 4px 0 var(--sdv-brown3), inset -4px -4px 0 var(--sdv-brown1);
-            margin: 16px 20px 0;
-            padding: 14px 16px;
-            text-align: center;
-        }
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--sdv-brown1); }
+    ::-webkit-scrollbar-thumb { background: var(--sdv-brown3); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--sdv-gold-dark); }
 
-        .login-header h1 {
-            font-size: 10px;
-            color: var(--sdv-gold);
-            text-shadow: 2px 2px 0 var(--sdv-border);
-            letter-spacing: 2px;
-        }
+    /* ── Login Overlay ── */
+    .login-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+      transition: opacity .5s ease;
+    }
+    .login-overlay.hidden { opacity: 0; pointer-events: none; }
 
-        .login-header p {
-            font-size: 6px;
-            color: var(--sdv-parch);
-            margin-top: 8px;
-            opacity: .8;
-        }
+    .login-box {
+      background: var(--sdv-parch);
+      border: 6px solid var(--sdv-border); border-radius: 4px;
+      box-shadow: inset 4px 4px 0 var(--sdv-border-inset),
+        inset -4px -4px 0 var(--sdv-parch-dark),
+        6px 6px 0 rgba(0,0,0,.5), 0 24px 64px rgba(0,0,0,.8);
+      width: 100%; max-width: 400px;
+      animation: dialogRise .5s cubic-bezier(.22,.68,0,1.2) both;
+      position: relative;
+    }
+    .login-box::before, .login-box::after,
+    .login-peg-bl, .login-peg-br {
+      content: ""; position: absolute; width: 8px; height: 8px;
+      background: var(--sdv-brown1); border: 2px solid var(--sdv-border);
+      border-radius: 50%; z-index: 10;
+    }
+    .login-box::before { top: 6px; left: 6px; }
+    .login-box::after  { top: 6px; right: 6px; }
+    .login-peg-bl { bottom: 6px; left: 6px; }
+    .login-peg-br { bottom: 6px; right: 6px; }
 
-        .login-body {
-            padding: 24px 24px 28px;
-        }
+    .login-header {
+      background: var(--sdv-brown2); border: 4px solid var(--sdv-border);
+      box-shadow: inset 4px 4px 0 var(--sdv-brown3), inset -4px -4px 0 var(--sdv-brown1);
+      margin: 16px 20px 0; padding: 16px; text-align: center;
+    }
+    .login-header-icon { font-size: 32px; display: block; margin-bottom: 8px; }
+    .login-header h1 {
+      font-size: clamp(8px, 2.5vw, 11px); color: var(--sdv-gold);
+      text-shadow: 2px 2px 0 var(--sdv-border); letter-spacing: 2px; margin-bottom: 6px;
+    }
+    .login-header p { font-size: 6px; color: var(--sdv-parch); opacity: .8; letter-spacing: 1px; }
 
-        .login-field {
-            margin-bottom: 16px;
-        }
+    .login-body { padding: 20px 20px 24px; }
+    .login-field { margin-bottom: 14px; }
+    .login-field label { display: block; font-size: 7px; color: var(--sdv-brown1); margin-bottom: 7px; letter-spacing: 1px; }
+    .login-field input {
+      width: 100%; font-family: var(--fp); font-size: 7px; color: var(--sdv-ink);
+      background: #f4dca6; border: 4px solid var(--sdv-border); padding: 10px 12px;
+      outline: none; -webkit-appearance: none; appearance: none;
+      box-shadow: inset 4px 4px 0 rgba(0,0,0,.1), inset -4px -4px 0 rgba(255,255,255,.4);
+    }
+    .login-field input:focus {
+      background: #fff8e8;
+      box-shadow: inset 4px 4px 0 rgba(0,0,0,.1), inset -4px -4px 0 rgba(255,255,255,.4),
+        0 0 0 4px var(--sdv-gold), 0 0 0 8px rgba(240,192,80,.3);
+    }
+    .login-field input::placeholder { color: rgba(90,50,20,.4); font-size: 6px; }
 
-        .login-field label {
-            display: block;
-            font-size: 7px;
-            color: var(--sdv-brown1);
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-        }
+    .login-btn {
+      width: 100%; font-family: var(--fp); font-size: 8px;
+      background: var(--sdv-brown2); color: var(--sdv-parch);
+      text-shadow: 2px 2px 0 var(--sdv-border); border: 4px solid var(--sdv-border);
+      padding: 14px; cursor: pointer; letter-spacing: 1px; margin-top: 4px;
+      box-shadow: inset 4px 4px 0 var(--sdv-brown3), inset -4px -4px 0 var(--sdv-brown1), 0 6px 0 var(--sdv-border);
+      transition: transform .05s;
+    }
+    .login-btn:hover:not(:disabled) { background: var(--sdv-brown3); }
+    .login-btn:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: inset 4px 4px 0 var(--sdv-brown1), inset -4px -4px 0 var(--sdv-brown3), 0 2px 0 var(--sdv-border);
+    }
+    .login-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .login-error { font-size: 6px; color: var(--sdv-red); margin-top: 10px; text-align: center; display: none; line-height: 1.8; }
+    .login-error.show { display: block; }
 
-        .login-field input {
-            width: 100%;
-            font-family: var(--fp);
-            font-size: 8px;
-            color: var(--sdv-ink);
-            background: #f4dca6;
-            border: 4px solid var(--sdv-border);
-            padding: 10px 12px;
-            outline: none;
-            box-shadow: inset 4px 4px 0 rgba(0, 0, 0, 0.1), inset -4px -4px 0 rgba(255, 255, 255, 0.4);
-        }
+    /* ── Admin Shell ── */
+    .admin-shell {
+      position: relative; z-index: 20; width: 100%; min-height: 100vh;
+      display: none; flex-direction: column; align-items: center;
+      padding: 16px 12px 120px;
+    }
+    .admin-shell.visible { display: flex; }
+    .admin-inner { width: 100%; max-width: 960px; }
 
-        .login-field input:focus {
-            background: #fff8e8;
-            box-shadow: inset 4px 4px 0 rgba(0, 0, 0, 0.1), inset -4px -4px 0 rgba(255, 255, 255, 0.4),
-                0 0 0 4px var(--sdv-gold), 0 0 0 8px rgba(240, 192, 80, 0.3);
-        }
+    /* ── Top Bar ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+      background: var(--sdv-brown2); border: 4px solid var(--sdv-border);
+      box-shadow: inset 4px 4px 0 var(--sdv-brown3), inset -4px -4px 0 var(--sdv-brown1),
+        0 4px 0 var(--sdv-border), 0 8px 20px rgba(0,0,0,.5);
+      padding: 12px 16px; margin-bottom: 16px;
+    }
+    .topbar__title {
+      font-size: clamp(8px, 2.5vw, 11px); color: var(--sdv-gold);
+      text-shadow: 2px 2px 0 var(--sdv-border); letter-spacing: 2px; white-space: nowrap;
+    }
+    .topbar__right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .stats-pill {
+      font-size: 6px; color: var(--sdv-parch); background: rgba(0,0,0,.2);
+      border: 2px solid var(--sdv-border); padding: 4px 8px; white-space: nowrap; letter-spacing: 1px;
+    }
+    .logout-btn {
+      font-family: var(--fp); font-size: 6px; background: var(--sdv-red); color: #fff;
+      border: 3px solid #8b1a1a; padding: 7px 12px; cursor: pointer; letter-spacing: 1px;
+      box-shadow: inset 2px 2px 0 #e04040, inset -2px -2px 0 #8b1a1a;
+      white-space: nowrap; transition: transform .05s;
+    }
+    .logout-btn:hover { background: #e84040; }
+    .logout-btn:active { transform: translateY(2px); }
 
-        .login-btn {
-            width: 100%;
-            font-family: var(--fp);
-            font-size: 9px;
-            background: var(--sdv-brown2);
-            color: var(--sdv-parch);
-            text-shadow: 2px 2px 0 var(--sdv-border);
-            border: 4px solid var(--sdv-border);
-            padding: 14px;
-            cursor: pointer;
-            box-shadow: inset 4px 4px 0 var(--sdv-brown3), inset -4px -4px 0 var(--sdv-brown1),
-                0 6px 0 var(--sdv-border);
-            letter-spacing: 1px;
-            transition: transform 0.05s;
-        }
+    /* ── Stats Row ── */
+    .stats-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .stat-card {
+      flex: 1; min-width: 80px;
+      background: var(--sdv-parch); border: 3px solid var(--sdv-border);
+      box-shadow: inset 2px 2px 0 var(--sdv-border-inset), inset -2px -2px 0 var(--sdv-parch-dark),
+        3px 3px 0 rgba(0,0,0,.3);
+      padding: 10px 8px; text-align: center;
+    }
+    .stat-card__num { font-size: clamp(14px, 3vw, 20px); color: var(--sdv-brown1); display: block; margin-bottom: 4px; }
+    .stat-card__label { font-size: 5px; color: var(--sdv-brown2); letter-spacing: 1px; }
+    .stat-card.unread { background: #fff8e4; }
+    .stat-card.unread .stat-card__num { color: var(--sdv-gold-dark); }
 
-        .login-btn:active {
-            transform: translateY(4px);
-            box-shadow: inset 4px 4px 0 var(--sdv-brown1), inset -4px -4px 0 var(--sdv-brown3),
-                0 2px 0 var(--sdv-border);
-        }
+    /* ── Controls ── */
+    .controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .search-row { display: flex; gap: 8px; }
+    .search-input {
+      flex: 1; font-family: var(--fp); font-size: 7px; color: var(--sdv-ink);
+      background: #f4dca6; border: 3px solid var(--sdv-border); padding: 8px 12px;
+      outline: none; min-width: 0; -webkit-appearance: none; appearance: none;
+      box-shadow: inset 3px 3px 0 rgba(0,0,0,.1);
+    }
+    .search-input:focus { background: #fff8e8; box-shadow: inset 3px 3px 0 rgba(0,0,0,.1), 0 0 0 3px var(--sdv-gold); }
+    .search-input::placeholder { color: rgba(90,50,20,.4); font-size: 6px; }
 
-        .login-btn:disabled {
-            opacity: .5;
-            cursor: not-allowed;
-        }
+    .refresh-btn {
+      font-family: var(--fp); font-size: 14px;
+      background: var(--sdv-brown2); color: var(--sdv-parch);
+      border: 3px solid var(--sdv-border); padding: 8px 14px; cursor: pointer;
+      box-shadow: inset 2px 2px 0 var(--sdv-brown3), inset -2px -2px 0 var(--sdv-brown1);
+      flex-shrink: 0; transition: transform .05s;
+    }
+    .refresh-btn:hover { background: var(--sdv-brown3); }
+    .refresh-btn:active { transform: translateY(2px); }
 
-        .login-error {
-            font-size: 6px;
-            color: var(--sdv-red);
-            margin-top: 12px;
-            text-align: center;
-            display: none;
-        }
+    .filter-scroll {
+      display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    }
+    .filter-scroll::-webkit-scrollbar { display: none; }
+    .filter-btn {
+      font-family: var(--fp); font-size: 6px; background: var(--sdv-parch-dark); color: var(--sdv-ink);
+      border: 3px solid var(--sdv-border); padding: 6px 10px; cursor: pointer;
+      letter-spacing: 1px; white-space: nowrap; flex-shrink: 0;
+      box-shadow: inset 2px 2px 0 rgba(255,255,255,.4), inset -2px -2px 0 rgba(0,0,0,.1);
+      transition: transform .05s;
+    }
+    .filter-btn:active { transform: translateY(1px); }
+    .filter-btn.active {
+      background: var(--sdv-gold); color: var(--sdv-border);
+      box-shadow: inset 2px 2px 0 var(--sdv-gold-hi), inset -2px -2px 0 var(--sdv-gold-dark);
+    }
 
-        .login-error.show {
-            display: block;
-        }
+    /* ── Letter Cards ── */
+    .letters-container { display: flex; flex-direction: column; gap: 12px; }
+    .letter-card {
+      background: var(--sdv-parch); border: 4px solid var(--sdv-border); border-radius: 2px;
+      box-shadow: inset 3px 3px 0 var(--sdv-border-inset), inset -3px -3px 0 var(--sdv-parch-dark),
+        4px 4px 0 rgba(0,0,0,.3);
+      overflow: hidden; transition: transform .1s;
+    }
+    .letter-card:hover { transform: translateY(-2px); }
+    .letter-card.unread { border-color: var(--sdv-gold-dark); }
+    .letter-card.unread .letter-card__header { background: linear-gradient(135deg, #fff4c0, var(--sdv-gold)); }
+    .letter-card.unread .letter-card__unread-dot { display: inline-block; }
+    .letter-card__unread-dot {
+      display: none; width: 8px; height: 8px; background: var(--sdv-red);
+      border: 2px solid #8b1a1a; border-radius: 50%; flex-shrink: 0;
+    }
+    .letter-card__header {
+      background: var(--sdv-parch-dark); padding: 10px 14px;
+      display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+      border-bottom: 3px solid var(--sdv-border);
+    }
+    .letter-card__from {
+      font-size: 8px; color: var(--sdv-ink); flex: 1; min-width: 100px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .letter-card__badge {
+      font-size: 6px; background: var(--sdv-brown2); color: var(--sdv-parch);
+      padding: 3px 8px; border: 2px solid var(--sdv-border); white-space: nowrap; flex-shrink: 0;
+    }
+    .letter-card.unread .letter-card__badge { background: var(--sdv-brown1); }
+    .letter-card__time { font-size: 5px; color: var(--sdv-brown2); white-space: nowrap; flex-shrink: 0; }
+    .letter-card__body { padding: 14px; }
+    .letter-card__message {
+      font-size: 7px; line-height: 2; color: var(--sdv-ink);
+      word-break: break-word; white-space: pre-wrap; max-height: 200px; overflow-y: auto;
+    }
+    .letter-card__footer {
+      padding: 8px 14px; display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 8px; border-top: 2px solid var(--sdv-parch-deep);
+    }
+    .letter-card__contact { font-size: 6px; color: var(--sdv-brown1); word-break: break-all; flex: 1; min-width: 0; }
+    .letter-card__actions { display: flex; gap: 6px; flex-shrink: 0; }
 
-        /* ═══════════════════════════════════════════
-       ADMIN DASHBOARD
-    ═══════════════════════════════════════════ */
-        .admin-wrap {
-            width: 100%;
-            max-width: 900px;
-            padding: 20px 16px 60px;
-            display: none;
-        }
+    .mark-read-btn {
+      font-family: var(--fp); font-size: 5px; background: var(--sdv-green); color: #fff;
+      border: 2px solid #2e6014; padding: 5px 8px; cursor: pointer;
+      box-shadow: inset 2px 2px 0 #70c440; white-space: nowrap; transition: transform .05s;
+    }
+    .mark-read-btn:hover { background: #68c034; }
+    .mark-read-btn:active { transform: translateY(1px); }
 
-        .admin-wrap.visible {
-            display: block;
-        }
+    .delete-btn {
+      font-family: var(--fp); font-size: 5px; background: var(--sdv-red); color: #fff;
+      border: 2px solid #8b1a1a; padding: 5px 8px; cursor: pointer;
+      box-shadow: inset 2px 2px 0 #e04040; white-space: nowrap; transition: transform .05s;
+    }
+    .delete-btn:hover { background: #e84040; }
+    .delete-btn:active { transform: translateY(1px); }
+    .read-label { font-size: 5px; color: var(--sdv-green); white-space: nowrap; }
 
-        /* Top Bar */
-        .admin-topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--sdv-brown2);
-            border: 4px solid var(--sdv-border);
-            box-shadow: inset 4px 4px 0 var(--sdv-brown3), inset -4px -4px 0 var(--sdv-brown1);
-            padding: 12px 16px;
-            margin-bottom: 20px;
-        }
+    /* ── Empty / Loading ── */
+    .empty-state {
+      text-align: center; padding: 48px 20px;
+      background: var(--sdv-parch); border: 4px solid var(--sdv-border);
+      box-shadow: inset 3px 3px 0 var(--sdv-border-inset), inset -3px -3px 0 var(--sdv-parch-dark),
+        4px 4px 0 rgba(0,0,0,.3);
+    }
+    .empty-state .icon { font-size: 48px; display: block; margin-bottom: 16px; }
+    .empty-state p { font-size: 8px; line-height: 2; color: var(--sdv-brown2); }
+    .loading-state { text-align: center; padding: 40px 20px; font-size: 8px; color: var(--sdv-gold); animation: pulse 1s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .3 } }
 
-        .admin-topbar h1 {
-            font-size: 9px;
-            color: var(--sdv-gold);
-            text-shadow: 2px 2px 0 var(--sdv-border);
-            letter-spacing: 2px;
-        }
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: var(--sdv-parch); border: 3px solid var(--sdv-border);
+      box-shadow: 4px 4px 0 var(--sdv-border); padding: 10px 18px;
+      font-size: 7px; color: var(--sdv-brown1); z-index: 300;
+      white-space: nowrap; opacity: 0; pointer-events: none;
+      transition: transform .3s cubic-bezier(.22,.68,0,1.3), opacity .3s;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.err { background: #fff0ee; border-color: var(--sdv-red); color: var(--sdv-red); }
 
-        .admin-topbar .stats {
-            font-size: 7px;
-            color: var(--sdv-parch);
-        }
+    /* ── Confirm Dialog ── */
+    .confirm-overlay {
+      position: fixed; inset: 0; z-index: 400; background: rgba(10,5,2,.7);
+      display: none; align-items: center; justify-content: center; padding: 16px;
+    }
+    .confirm-overlay.show { display: flex; }
+    .confirm-box {
+      background: var(--sdv-parch); border: 6px solid var(--sdv-border);
+      box-shadow: inset 4px 4px 0 var(--sdv-border-inset), inset -4px -4px 0 var(--sdv-parch-dark),
+        6px 6px 0 rgba(0,0,0,.5);
+      width: 100%; max-width: 360px;
+      animation: dialogRise .3s cubic-bezier(.22,.68,0,1.2) both;
+      position: relative;
+    }
+    .confirm-box::before, .confirm-box::after,
+    .confirm-peg-bl, .confirm-peg-br {
+      content: ""; position: absolute; width: 8px; height: 8px;
+      background: var(--sdv-brown1); border: 2px solid var(--sdv-border); border-radius: 50%;
+    }
+    .confirm-box::before { top: 6px; left: 6px; }
+    .confirm-box::after  { top: 6px; right: 6px; }
+    .confirm-peg-bl { bottom: 6px; left: 6px; }
+    .confirm-peg-br { bottom: 6px; right: 6px; }
+    .confirm-header {
+      background: var(--sdv-red); border-bottom: 4px solid var(--sdv-border);
+      padding: 14px 16px; text-align: center;
+    }
+    .confirm-header h2 { font-size: 9px; color: #fff; text-shadow: 2px 2px 0 #8b1a1a; letter-spacing: 1px; }
+    .confirm-body { padding: 20px 20px 24px; text-align: center; }
+    .confirm-body p { font-size: 7px; color: var(--sdv-ink); line-height: 2; margin-bottom: 20px; }
+    .confirm-btns { display: flex; gap: 10px; }
+    .confirm-btn {
+      flex: 1; font-family: var(--fp); font-size: 7px; border: 3px solid var(--sdv-border);
+      padding: 10px; cursor: pointer; letter-spacing: 1px; transition: transform .05s;
+    }
+    .confirm-btn:active { transform: translateY(2px); }
+    .confirm-btn--cancel { background: var(--sdv-parch-dark); color: var(--sdv-ink); box-shadow: inset 2px 2px 0 rgba(255,255,255,.4); }
+    .confirm-btn--delete { background: var(--sdv-red); color: #fff; text-shadow: 1px 1px 0 #8b1a1a; box-shadow: inset 2px 2px 0 #e04040; }
 
-        .logout-btn {
-            font-family: var(--fp);
-            font-size: 7px;
-            background: var(--sdv-red);
-            color: #fff;
-            border: 3px solid #8b1a1a;
-            padding: 6px 12px;
-            cursor: pointer;
-            letter-spacing: 1px;
-            box-shadow: inset 2px 2px 0 #e04040, inset -2px -2px 0 #8b1a1a;
-        }
+    /* ── Animation ── */
+    @keyframes dialogRise {
+      from { opacity: 0; transform: translateY(24px) scale(.96); }
+      to   { opacity: 1; transform: none; }
+    }
 
-        .logout-btn:active {
-            transform: translateY(2px);
-        }
-
-        /* Filters */
-        .filter-bar {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-
-        .filter-btn {
-            font-family: var(--fp);
-            font-size: 6px;
-            background: var(--sdv-parch-dark);
-            color: var(--sdv-ink);
-            border: 3px solid var(--sdv-border);
-            padding: 6px 10px;
-            cursor: pointer;
-            letter-spacing: 1px;
-            box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.4), inset -2px -2px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .filter-btn.active {
-            background: var(--sdv-gold);
-            color: var(--sdv-border);
-        }
-
-        /* Letter Cards */
-        .letters-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .letter-card {
-            background: var(--sdv-parch);
-            border: 4px solid var(--sdv-border);
-            border-radius: 4px;
-            box-shadow: inset 3px 3px 0 var(--sdv-border-inset), inset -3px -3px 0 var(--sdv-parch-dark),
-                4px 4px 0 rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            transition: transform 0.1s;
-        }
-
-        .letter-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .letter-card.unread {
-            border-color: var(--sdv-gold-dark);
-        }
-
-        .letter-card.unread .letter-card__header {
-            background: var(--sdv-gold);
-        }
-
-        .letter-card__header {
-            background: var(--sdv-parch-dark);
-            padding: 10px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 3px solid var(--sdv-border);
-            gap: 8px;
-        }
-
-        .letter-card__from {
-            font-size: 8px;
-            color: var(--sdv-ink);
-            flex: 1;
-        }
-
-        .letter-card__badge {
-            font-size: 6px;
-            background: var(--sdv-brown2);
-            color: var(--sdv-parch);
-            padding: 3px 8px;
-            border: 2px solid var(--sdv-border);
-            white-space: nowrap;
-        }
-
-        .letter-card__time {
-            font-size: 5px;
-            color: var(--sdv-brown2);
-            white-space: nowrap;
-        }
-
-        .letter-card__body {
-            padding: 14px;
-        }
-
-        .letter-card__message {
-            font-size: 7px;
-            line-height: 2;
-            color: var(--sdv-ink);
-            word-break: break-word;
-            white-space: pre-wrap;
-        }
-
-        .letter-card__footer {
-            padding: 8px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-top: 2px solid var(--sdv-parch-deep);
-            font-size: 6px;
-            color: var(--sdv-brown2);
-        }
-
-        .letter-card__contact {
-            color: var(--sdv-brown1);
-        }
-
-        .mark-read-btn {
-            font-family: var(--fp);
-            font-size: 6px;
-            background: var(--sdv-green);
-            color: #fff;
-            border: 2px solid #2e6014;
-            padding: 4px 8px;
-            cursor: pointer;
-            box-shadow: inset 2px 2px 0 #70c440;
-        }
-
-        .mark-read-btn:active {
-            transform: translateY(1px);
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--sdv-brown2);
-        }
-
-        .empty-state .icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .empty-state p {
-            font-size: 8px;
-            line-height: 2;
-        }
-
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 40px;
-            font-size: 8px;
-            color: var(--sdv-gold);
-            animation: pulse 1s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: .4;
-            }
-        }
-
-        @keyframes dialogRise {
-            from {
-                opacity: 0;
-                transform: translateY(24px) scale(.96);
-            }
-
-            to {
-                opacity: 1;
-                transform: none;
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .admin-topbar {
-                flex-direction: column;
-                gap: 8px;
-                text-align: center;
-            }
-
-            .letter-card__header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-    </style>
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .topbar { flex-direction: column; align-items: flex-start; }
+      .topbar__right { width: 100%; justify-content: space-between; }
+      .stats-row { gap: 6px; }
+      .stat-card { min-width: 60px; padding: 8px 6px; }
+      .letter-card__body { padding: 10px 12px; }
+      .letter-card__footer { padding: 8px 12px; }
+      .letter-card__actions { width: 100%; justify-content: flex-end; }
+      .admin-shell { padding: 12px 8px 100px; }
+    }
+    @media (max-width: 360px) {
+      .topbar__title { font-size: 7px; }
+      .stat-card__num { font-size: 13px; }
+    }
+  </style>
 </head>
-
 <body>
 
-    <!-- ═══════════════════════════════════════════
-       LOGIN OVERLAY
-  ═══════════════════════════════════════════ -->
-    <div class="login-overlay" id="loginOverlay">
-        <div class="login-box">
-            <div class="login-header">
-                <h1>🔒 ADMIN LOGIN</h1>
-                <p>Valley Post Office — Private Access</p>
-            </div>
-            <div class="login-body">
-                <div class="login-field">
-                    <label>ADMIN EMAIL</label>
-                    <input type="email" id="adminEmail" placeholder="Your admin email..." autocomplete="email" />
-                </div>
-                <div class="login-field">
-                    <label>PASSWORD</label>
-                    <input type="password" id="adminPass" placeholder="Secret password..."
-                        autocomplete="current-password" />
-                </div>
-                <button class="login-btn" id="loginBtn" onclick="handleLogin()">🗝️ ENTER POST OFFICE</button>
-                <p class="login-error" id="loginError"></p>
-            </div>
+  <!-- SCENE LAYERS -->
+  <div class="sky"></div>
+  <div class="stars" id="starsLayer"></div>
+
+  <svg class="sun" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+    <rect x="16" y="0"  width="8"  height="4"  fill="#f0d060"/>
+    <rect x="16" y="36" width="8"  height="4"  fill="#f0d060"/>
+    <rect x="0"  y="16" width="4"  height="8"  fill="#f0d060"/>
+    <rect x="36" y="16" width="4"  height="8"  fill="#f0d060"/>
+    <rect x="4"  y="4"  width="4"  height="4"  fill="#f0d060"/>
+    <rect x="32" y="4"  width="4"  height="4"  fill="#f0d060"/>
+    <rect x="4"  y="32" width="4"  height="4"  fill="#f0d060"/>
+    <rect x="32" y="32" width="4"  height="4"  fill="#f0d060"/>
+    <rect x="8"  y="8"  width="24" height="24" fill="#ffe840"/>
+    <rect x="12" y="12" width="16" height="16" fill="#fff070"/>
+  </svg>
+
+  <svg class="mountains" viewBox="0 0 1440 400" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <polygon points="0,400 0,220 120,80 240,180 360,60 480,160 600,30 720,140 840,50 960,170 1080,40 1200,160 1320,70 1440,180 1440,400" fill="#1e4008"/>
+    <polygon points="0,400 0,280 100,160 200,240 320,120 440,220 560,100 680,200 800,120 920,230 1040,100 1160,220 1280,130 1440,250 1440,400" fill="#2e6014"/>
+  </svg>
+
+  <div class="ground-far"></div>
+  <div class="ground-mid"></div>
+  <div class="ground-near"></div>
+
+  <svg class="deco-tree deco-tree-l" viewBox="0 0 64 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="24" y="80" width="16" height="40" fill="#6b3a1f"/>
+    <rect x="28" y="80" width="4"  height="40" fill="#8b5530"/>
+    <rect x="8"  y="60" width="48" height="28" fill="#2d6b0e"/>
+    <rect x="4"  y="64" width="56" height="4"  fill="#1e4a08"/>
+    <rect x="12" y="40" width="40" height="24" fill="#3d8010"/>
+    <rect x="8"  y="44" width="48" height="4"  fill="#2d6b0e"/>
+    <rect x="18" y="20" width="28" height="24" fill="#4a9818"/>
+    <rect x="14" y="24" width="36" height="4"  fill="#3d8010"/>
+    <rect x="22" y="4"  width="20" height="20" fill="#5ab020"/>
+    <rect x="24" y="6"  width="8"  height="4"  fill="#70c830"/>
+    <rect x="4"  y="58" width="4"  height="4"  fill="#e08020"/>
+    <rect x="52" y="62" width="4"  height="4"  fill="#c05010"/>
+  </svg>
+
+  <svg class="deco-tree deco-tree-r" viewBox="0 0 64 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="24" y="80" width="16" height="40" fill="#6b3a1f"/>
+    <rect x="28" y="80" width="4"  height="40" fill="#8b5530"/>
+    <rect x="8"  y="60" width="48" height="28" fill="#2d6b0e"/>
+    <rect x="4"  y="64" width="56" height="4"  fill="#1e4a08"/>
+    <rect x="12" y="40" width="40" height="24" fill="#3d8010"/>
+    <rect x="8"  y="44" width="48" height="4"  fill="#2d6b0e"/>
+    <rect x="18" y="20" width="28" height="24" fill="#4a9818"/>
+    <rect x="14" y="24" width="36" height="4"  fill="#3d8010"/>
+    <rect x="22" y="4"  width="20" height="20" fill="#5ab020"/>
+    <rect x="24" y="6"  width="8"  height="4"  fill="#70c830"/>
+    <rect x="4"  y="58" width="4"  height="4"  fill="#e08020"/>
+    <rect x="52" y="62" width="4"  height="4"  fill="#c05010"/>
+  </svg>
+
+  <div class="leaves-layer" id="leavesLayer"></div>
+
+  <!-- LOGIN OVERLAY -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+      <span class="login-peg-bl"></span>
+      <span class="login-peg-br"></span>
+      <div class="login-header">
+        <span class="login-header-icon">🔒</span>
+        <h1>ADMIN LOGIN</h1>
+        <p>Valley Post Office — Private Access</p>
+      </div>
+      <div class="login-body">
+        <div class="login-field">
+          <label for="adminEmail">ADMIN EMAIL</label>
+          <input type="email" id="adminEmail" placeholder="Your admin email..." autocomplete="email" />
         </div>
+        <div class="login-field">
+          <label for="adminPass">PASSWORD</label>
+          <input type="password" id="adminPass" placeholder="Secret password..." autocomplete="current-password" />
+        </div>
+        <button class="login-btn" id="loginBtn" onclick="handleLogin()">🗝️ ENTER POST OFFICE</button>
+        <p class="login-error" id="loginError"></p>
+      </div>
     </div>
+  </div>
 
-    <!-- ═══════════════════════════════════════════
-       ADMIN DASHBOARD
-  ═══════════════════════════════════════════ -->
-    <div class="admin-wrap" id="adminWrap">
-        <div class="admin-topbar">
-            <h1>📬 VALLEY POST OFFICE</h1>
-            <span class="stats" id="statsText">Loading...</span>
-            <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
-        </div>
+  <!-- ADMIN DASHBOARD -->
+  <div class="admin-shell" id="adminShell">
+    <div class="admin-inner">
 
-        <div class="filter-bar" id="filterBar">
-            <button class="filter-btn active" onclick="filterLetters('all', this)">ALL</button>
-            <button class="filter-btn" onclick="filterLetters('unread', this)">📩 UNREAD</button>
-            <button class="filter-btn" onclick="filterLetters('read', this)">✅ READ</button>
-            <button class="filter-btn" onclick="filterLetters('Question', this)">❓ Question</button>
-            <button class="filter-btn" onclick="filterLetters('Feedback', this)">💬 Feedback</button>
-            <button class="filter-btn" onclick="filterLetters('Bug Report', this)">🐛 Bug</button>
-            <button class="filter-btn" onclick="filterLetters('Collab', this)">🤝 Collab</button>
-            <button class="filter-btn" onclick="filterLetters('Suggestion', this)">💡 Suggest</button>
+      <div class="topbar">
+        <div class="topbar__title">📬 VALLEY POST OFFICE</div>
+        <div class="topbar__right">
+          <span class="stats-pill" id="statsText">Loading…</span>
+          <button class="logout-btn" onclick="handleLogout()">⬡ LOGOUT</button>
         </div>
+      </div>
 
-        <div class="letters-container" id="lettersContainer">
-            <div class="loading" id="loadingIndicator">📮 Loading letters from the valley...</div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-card__num" id="statTotal">—</span>
+          <span class="stat-card__label">TOTAL</span>
         </div>
+        <div class="stat-card unread">
+          <span class="stat-card__num" id="statUnread">—</span>
+          <span class="stat-card__label">UNREAD</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__num" id="statRead">—</span>
+          <span class="stat-card__label">READ</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="search-row">
+          <input class="search-input" id="searchInput" type="text"
+                 placeholder="🔍 Search letters..." oninput="applyFilters()" />
+          <button class="refresh-btn" onclick="loadLetters()" title="Refresh">↺</button>
+        </div>
+        <div class="filter-scroll" id="filterBar">
+          <button class="filter-btn active" onclick="setFilter('all',this)">ALL</button>
+          <button class="filter-btn" onclick="setFilter('unread',this)">📩 UNREAD</button>
+          <button class="filter-btn" onclick="setFilter('read',this)">✅ READ</button>
+          <button class="filter-btn" onclick="setFilter('Question',this)">❓ Question</button>
+          <button class="filter-btn" onclick="setFilter('Feedback',this)">💬 Feedback</button>
+          <button class="filter-btn" onclick="setFilter('Bug Report',this)">🐛 Bug</button>
+          <button class="filter-btn" onclick="setFilter('Collab',this)">🤝 Collab</button>
+          <button class="filter-btn" onclick="setFilter('Suggestion',this)">💡 Suggest</button>
+          <button class="filter-btn" onclick="setFilter('Just Saying Hi',this)">👋 Hi</button>
+          <button class="filter-btn" onclick="setFilter('Other',this)">📦 Other</button>
+        </div>
+      </div>
+
+      <div class="letters-container" id="lettersContainer">
+        <div class="loading-state">📮 Loading letters from the valley…</div>
+      </div>
+
     </div>
+  </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc }
-            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword }
-            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  <!-- Toast -->
+  <div class="toast" id="toastEl"></div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyB2mtAuuQ3pMz_rCoUKKM0tpqedEcY_m9JY",
-            authDomain: "valley-mail.firebaseapp.com",
-            projectId: "valley-mail",
-            storageBucket: "valley-mail.firebasestorage.app",
-            messagingSenderId: "663200969338",
-            appId: "1:663200969338:web:386a3d7da472a2f294c1c3"
-        };
+  <!-- Confirm Delete Dialog -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <span class="confirm-peg-bl"></span>
+      <span class="confirm-peg-br"></span>
+      <div class="confirm-header"><h2>🗑️ DELETE LETTER?</h2></div>
+      <div class="confirm-body">
+        <p>This letter will be permanently<br/>removed from the valley!<br/><br/>Are you sure, farmer?</p>
+        <div class="confirm-btns">
+          <button class="confirm-btn confirm-btn--cancel" onclick="cancelDelete()">CANCEL</button>
+          <button class="confirm-btn confirm-btn--delete" onclick="confirmDelete()">DELETE</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc, deleteDoc }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-        let allLetters = [];
+    const firebaseConfig = {
+      apiKey: "AIzaSyB2mtAuuQ3pMz_rCoUKKM0tpqedEcY_m9JY",
+      authDomain: "valley-mail.firebaseapp.com",
+      projectId: "valley-mail",
+      storageBucket: "valley-mail.firebasestorage.app",
+      messagingSenderId: "663200969338",
+      appId: "1:663200969338:web:386a3d7da472a2f294c1c3"
+    };
 
-        // ── Auth State ─────────────────────────────────
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                document.getElementById("loginOverlay").classList.add("hidden");
-                document.getElementById("adminWrap").classList.add("visible");
-                await loadLetters();
-            } else {
-                document.getElementById("loginOverlay").classList.remove("hidden");
-                document.getElementById("adminWrap").classList.remove("visible");
-            }
-        });
+    const app  = initializeApp(firebaseConfig);
+    const db   = getFirestore(app);
+    const auth = getAuth(app);
 
-        // ── Login Handler ──────────────────────────────
-        window.handleLogin = async function () {
-            const email = document.getElementById("adminEmail").value.trim();
-            const pass = document.getElementById("adminPass").value;
-            const errEl = document.getElementById("loginError");
-            const btn = document.getElementById("loginBtn");
+    let allLetters     = [];
+    let currentFilter  = "all";
+    let pendingDeleteId = null;
 
-            if (!email || !pass) {
-                errEl.textContent = "⚠️ Please fill in both fields!";
-                errEl.classList.add("show");
-                return;
-            }
+    /* Auth */
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        document.getElementById("loginOverlay").classList.add("hidden");
+        document.getElementById("adminShell").classList.add("visible");
+        await loadLetters();
+      } else {
+        document.getElementById("loginOverlay").classList.remove("hidden");
+        document.getElementById("adminShell").classList.remove("visible");
+      }
+    });
 
-            btn.disabled = true;
-            btn.textContent = "🔑 AUTHENTICATING...";
-            errEl.classList.remove("show");
+    /* Login */
+    window.handleLogin = async function () {
+      const email = document.getElementById("adminEmail").value.trim();
+      const pass  = document.getElementById("adminPass").value;
+      const errEl = document.getElementById("loginError");
+      const btn   = document.getElementById("loginBtn");
+      if (!email || !pass) {
+        errEl.textContent = "⚠️ Please fill in both fields!";
+        errEl.classList.add("show");
+        return;
+      }
+      btn.disabled    = true;
+      btn.textContent = "🔑 AUTHENTICATING…";
+      errEl.classList.remove("show");
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (e) {
+        let msg = "❌ Login failed!";
+        if (e.code === "auth/user-not-found" || e.code === "auth/invalid-credential")
+          msg = "❌ Invalid credentials. Access denied.";
+        else if (e.code === "auth/wrong-password")
+          msg = "❌ Wrong password!";
+        else if (e.code === "auth/too-many-requests")
+          msg = "⏳ Too many attempts. Please wait.";
+        errEl.textContent = msg;
+        errEl.classList.add("show");
+        btn.disabled    = false;
+        btn.textContent = "🗝️ ENTER POST OFFICE";
+      }
+    };
 
-            try {
-                await signInWithEmailAndPassword(auth, email, pass);
-            } catch (e) {
-                console.error(e);
-                let msg = "❌ Login failed!";
-                if (e.code === "auth/user-not-found" || e.code === "auth/invalid-credential") {
-                    msg = "❌ Invalid credentials. Access denied.";
-                } else if (e.code === "auth/wrong-password") {
-                    msg = "❌ Wrong password!";
-                } else if (e.code === "auth/too-many-requests") {
-                    msg = "⏳ Too many attempts. Wait a moment.";
-                }
-                errEl.textContent = msg;
-                errEl.classList.add("show");
-            }
+    /* Logout */
+    window.handleLogout = async function () { await signOut(auth); };
 
-            btn.disabled = false;
-            btn.textContent = "🗝️ ENTER POST OFFICE";
-        };
+    /* Load */
+    window.loadLetters = async function () {
+      const container = document.getElementById("lettersContainer");
+      container.innerHTML = '<div class="loading-state">📮 Loading letters from the valley…</div>';
+      try {
+        const q    = query(collection(db, "valley_letters"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        allLetters = [];
+        snap.forEach((d) => allLetters.push({ id: d.id, ...d.data() }));
+        updateStats();
+        applyFilters();
+      } catch (err) {
+        container.innerHTML = `<div class="empty-state"><span class="icon">⚠️</span><p>Failed to load letters.<br/>Check your permissions.<br/><br/>${escapeHtml(err.message)}</p></div>`;
+      }
+    };
 
-        // ── Logout Handler ─────────────────────────────
-        window.handleLogout = async function () {
-            await signOut(auth);
-        };
+    /* Filter */
+    window.setFilter = function (filter, btnEl) {
+      currentFilter = filter;
+      document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+      btnEl.classList.add("active");
+      applyFilters();
+    };
 
-        // ── Load Letters ───────────────────────────────
-        async function loadLetters() {
-            const container = document.getElementById("lettersContainer");
-            const loading = document.getElementById("loadingIndicator");
-            loading.style.display = "block";
+    window.applyFilters = function () {
+      const search = (document.getElementById("searchInput").value || "").toLowerCase().trim();
+      let filtered = allLetters;
+      if (currentFilter === "unread")      filtered = filtered.filter((l) => !l.read);
+      else if (currentFilter === "read")   filtered = filtered.filter((l) => l.read);
+      else if (currentFilter !== "all")    filtered = filtered.filter((l) => l.category === currentFilter);
+      if (search) {
+        filtered = filtered.filter((l) =>
+          (l.name    || "").toLowerCase().includes(search) ||
+          (l.message || "").toLowerCase().includes(search) ||
+          (l.contact || "").toLowerCase().includes(search) ||
+          (l.category|| "").toLowerCase().includes(search));
+      }
+      renderLetters(filtered);
+    };
 
-            try {
-                const q = query(collection(db, "valley_letters"), orderBy("createdAt", "desc"));
-                const snap = await getDocs(q);
-
-                allLetters = [];
-                snap.forEach((docSnap) => {
-                    allLetters.push({ id: docSnap.id, ...docSnap.data() });
-                });
-
-                updateStats();
-                renderLetters(allLetters);
-            } catch (err) {
-                console.error("Failed to load letters:", err);
-                container.innerHTML = `
-          <div class="empty-state">
-            <div class="icon">⚠️</div>
-            <p>Failed to load letters.<br/>Check your permissions.<br/><br/>Error: ${err.message}</p>
-          </div>`;
-            }
-            loading.style.display = "none";
-        }
-
-        // ── Render Letters ─────────────────────────────
-        function renderLetters(letters) {
-            const container = document.getElementById("lettersContainer");
-
-            if (letters.length === 0) {
-                container.innerHTML = `
-          <div class="empty-state">
-            <div class="icon">📭</div>
-            <p>No letters found.<br/>The mailbox is empty, farmer!</p>
-          </div>`;
-                return;
-            }
-
-            container.innerHTML = letters.map((l) => {
-                const isUnread = !l.read;
-                const date = l.createdAt?.toDate ? l.createdAt.toDate().toLocaleString() : "Unknown date";
-                const contact = l.contact ? `📧 ${l.contact}` : "No contact provided";
-
-                return `
-          <div class="letter-card ${isUnread ? 'unread' : ''}" id="card-${l.id}">
-            <div class="letter-card__header">
-              <span class="letter-card__from">👤 ${escapeHtml(l.name)}</span>
-              <span class="letter-card__badge">${escapeHtml(l.category || 'Letter')}</span>
-              <span class="letter-card__time">🕐 ${date}</span>
+    /* Render */
+    function renderLetters(letters) {
+      const container = document.getElementById("lettersContainer");
+      if (letters.length === 0) {
+        container.innerHTML = '<div class="empty-state"><span class="icon">📭</span><p>No letters found.<br/>The mailbox is empty, farmer!</p></div>';
+        return;
+      }
+      container.innerHTML = letters.map((l) => {
+        const isUnread = !l.read;
+        const date = l.createdAt?.toDate
+          ? l.createdAt.toDate().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
+          : "Unknown date";
+        const contact = l.contact ? `📧 ${escapeHtml(l.contact)}` : "No contact provided";
+        return `<div class="letter-card ${isUnread ? "unread" : ""}" id="card-${l.id}">
+          <div class="letter-card__header">
+            <span class="letter-card__unread-dot" title="Unread"></span>
+            <span class="letter-card__from">👤 ${escapeHtml(l.name)}</span>
+            <span class="letter-card__badge">${escapeHtml(l.category || "Letter")}</span>
+            <span class="letter-card__time">🕐 ${date}</span>
+          </div>
+          <div class="letter-card__body">
+            <div class="letter-card__message">${escapeHtml(l.message)}</div>
+          </div>
+          <div class="letter-card__footer">
+            <span class="letter-card__contact">${contact}</span>
+            <div class="letter-card__actions">
+              ${isUnread ? `<button class="mark-read-btn" onclick="markAsRead('${l.id}')">✅ Mark Read</button>` : '<span class="read-label">✅ Read</span>'}
+              <button class="delete-btn" onclick="askDelete('${l.id}')">🗑️ Delete</button>
             </div>
-            <div class="letter-card__body">
-              <div class="letter-card__message">${escapeHtml(l.message)}</div>
-            </div>
-            <div class="letter-card__footer">
-              <span class="letter-card__contact">${escapeHtml(contact)}</span>
-              ${isUnread ? `<button class="mark-read-btn" onclick="markAsRead('${l.id}')">✅ Mark Read</button>` : '<span style="color:var(--sdv-green)">✅ Read</span>'}
-            </div>
-          </div>`;
-            }).join("");
-        }
+          </div>
+        </div>`;
+      }).join("");
+    }
 
-        // ── Mark as Read ───────────────────────────────
-        window.markAsRead = async function (letterId) {
-            try {
-                await updateDoc(doc(db, "valley_letters", letterId), { read: true });
-                // update local state
-                const letter = allLetters.find((l) => l.id === letterId);
-                if (letter) letter.read = true;
-                updateStats();
-                renderLetters(getFilteredLetters());
-            } catch (err) {
-                console.error("Failed to mark as read:", err);
-                alert("Failed to update letter. Check permissions.");
-            }
-        };
+    /* Mark Read */
+    window.markAsRead = async function (letterId) {
+      try {
+        await updateDoc(doc(db, "valley_letters", letterId), { read: true });
+        const letter = allLetters.find((l) => l.id === letterId);
+        if (letter) letter.read = true;
+        updateStats();
+        applyFilters();
+        showToast("✅ Letter marked as read!");
+      } catch (err) {
+        showToast("⚠️ Failed to update letter.", true);
+      }
+    };
 
-        // ── Filtering ──────────────────────────────────
-        let currentFilter = "all";
+    /* Delete */
+    window.askDelete = function (letterId) {
+      pendingDeleteId = letterId;
+      document.getElementById("confirmOverlay").classList.add("show");
+    };
+    window.cancelDelete = function () {
+      pendingDeleteId = null;
+      document.getElementById("confirmOverlay").classList.remove("show");
+    };
+    window.confirmDelete = async function () {
+      document.getElementById("confirmOverlay").classList.remove("show");
+      if (!pendingDeleteId) return;
+      const id = pendingDeleteId;
+      pendingDeleteId = null;
+      try {
+        await deleteDoc(doc(db, "valley_letters", id));
+        allLetters = allLetters.filter((l) => l.id !== id);
+        updateStats();
+        applyFilters();
+        showToast("🗑️ Letter deleted.");
+      } catch (err) {
+        showToast("⚠️ Failed to delete letter.", true);
+      }
+    };
 
-        window.filterLetters = function (filter, btnEl) {
-            currentFilter = filter;
-            document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
-            btnEl.classList.add("active");
-            renderLetters(getFilteredLetters());
-        };
+    /* Stats */
+    function updateStats() {
+      const total  = allLetters.length;
+      const unread = allLetters.filter((l) => !l.read).length;
+      document.getElementById("statsText").textContent  = `${total} letters · ${unread} unread`;
+      document.getElementById("statTotal").textContent  = total;
+      document.getElementById("statUnread").textContent = unread;
+      document.getElementById("statRead").textContent   = total - unread;
+    }
 
-        function getFilteredLetters() {
-            if (currentFilter === "all") return allLetters;
-            if (currentFilter === "unread") return allLetters.filter((l) => !l.read);
-            if (currentFilter === "read") return allLetters.filter((l) => l.read);
-            return allLetters.filter((l) => l.category === currentFilter);
-        }
+    /* Escape */
+    function escapeHtml(str) {
+      if (!str) return "";
+      const d = document.createElement("div");
+      d.appendChild(document.createTextNode(str));
+      return d.innerHTML;
+    }
 
-        // ── Stats ──────────────────────────────────────
-        function updateStats() {
-            const total = allLetters.length;
-            const unread = allLetters.filter((l) => !l.read).length;
-            document.getElementById("statsText").textContent =
-                `${total} letters · ${unread} unread`;
-        }
+    /* Toast */
+    function showToast(msg, err) {
+      const t = document.getElementById("toastEl");
+      t.textContent = msg;
+      t.className = "toast" + (err ? " err" : "") + " show";
+      setTimeout(() => t.classList.remove("show"), 3000);
+    }
 
-        // ── Escape HTML ────────────────────────────────
-        function escapeHtml(str) {
-            if (!str) return "";
-            const d = document.createElement("div");
-            d.appendChild(document.createTextNode(str));
-            return d.innerHTML;
-        }
+    /* Enter key */
+    document.getElementById("adminPass").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handleLogin();
+    });
 
-        // Allow Enter key on password field
-        document.getElementById("adminPass")?.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") handleLogin();
-        });
-    </script>
+    /* Stars */
+    (function () {
+      const layer = document.getElementById("starsLayer");
+      const sizes = [2, 2, 2, 4, 4, 6];
+      for (let i = 0; i < 80; i++) {
+        const s  = document.createElement("div");
+        const sz = sizes[Math.floor(Math.random() * sizes.length)];
+        s.className  = "star";
+        s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${1.5+Math.random()*3}s;--del:${Math.random()*4}s;`;
+        layer.appendChild(s);
+      }
+    })();
 
+    /* Leaves */
+    (function () {
+      const layer = document.getElementById("leavesLayer");
+      const icons = ["🍂","🍁","🌿","🍃","🌾","✨"];
+      function addLeaf() {
+        const l = document.createElement("div");
+        l.className = "leaf";
+        l.textContent = icons[Math.floor(Math.random() * icons.length)];
+        l.style.cssText = `left:${Math.random()*100}vw;font-size:${10+Math.random()*12}px;--dur:${6+Math.random()*8}s;--del:${Math.random()*2}s;`;
+        layer.appendChild(l);
+        setTimeout(() => l.remove(), 16000);
+      }
+      for (let i = 0; i < 10; i++) setTimeout(addLeaf, i * 700);
+      setInterval(addLeaf, 800);
+    })();
+  </script>
 </body>
-
 </html>

@@ -799,7 +799,6 @@
       position: absolute;
       top: 32px;
       left: 50%;
-      transform: translateX(-50%);
       background: var(--sdv-parch);
       border: 4px solid var(--sdv-border);
       box-shadow: 6px 6px 0 var(--sdv-border);
@@ -1057,13 +1056,13 @@
   ================================================================ */
     .toast {
       position: fixed;
-      bottom: 80px;
+      bottom: max(80px, calc(env(safe-area-inset-bottom) + 20px));
       left: 50%;
       transform: translateX(-50%) translateY(60px);
       background: var(--sdv-parch);
       border: 3px solid var(--sdv-border);
       box-shadow: 4px 4px 0 var(--sdv-border);
-      padding: 12px 20px;
+      padding: 10px 18px;
       font-size: 7px;
       color: var(--sdv-brown1);
       z-index: 200;
@@ -1071,6 +1070,9 @@
       opacity: 0;
       transition: transform .3s cubic-bezier(.22, .68, 0, 1.3), opacity .3s;
       pointer-events: none;
+      max-width: calc(100vw - 32px);
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .toast.show {
@@ -1138,11 +1140,57 @@
     }
 
     /* ================================================================
+  TOP/BOTTOM BAND DECORATIVE STRIPES (pixel-art inset border lines)
+  ================================================================ */
+    .sdv-box__topband {
+      height: 6px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--sdv-brown3) 0 8px,
+        var(--sdv-brown2) 8px 16px
+      );
+      border-bottom: 2px solid var(--sdv-border);
+      opacity: .6;
+    }
+
+    .sdv-box__bottomband {
+      height: 6px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--sdv-brown2) 0 8px,
+        var(--sdv-brown3) 8px 16px
+      );
+      border-top: 2px solid var(--sdv-border);
+      opacity: .6;
+    }
+
+    /* ================================================================
   RESPONSIVE
   ================================================================ */
-    @media(max-width:520px) {
+    @media (max-width: 520px) {
+      .content-wrap {
+        padding: 16px 10px 100px;
+      }
+
       .sdv-box__body {
-        padding: 16px 12px;
+        padding: 16px 12px 20px;
+      }
+
+      .sdv-box__header {
+        margin: 12px 14px 0;
+        padding: 12px 14px;
+      }
+
+      .sdv-box__header-icon {
+        font-size: 28px;
+      }
+
+      .sdv-box__header-title {
+        font-size: 8px;
+      }
+
+      .sdv-box__header-sub {
+        font-size: 5px;
       }
 
       .field-label,
@@ -1152,10 +1200,12 @@
 
       .sdv-input {
         padding-left: 42px;
+        font-size: 6px;
       }
 
       .field-icon {
         width: 38px;
+        font-size: 14px;
       }
 
       .sdv-box__body::before {
@@ -1163,7 +1213,62 @@
       }
 
       .header-sign__title {
+        font-size: 8px;
+        letter-spacing: 2px;
+      }
+
+      .header-sign__sub {
+        font-size: 5px;
+      }
+
+      .header-sign__inner {
+        padding: 12px 20px;
+      }
+
+      .sdv-btn--send {
+        font-size: 8px;
+        padding: 14px;
+      }
+
+      .success-box__title {
+        font-size: 9px;
+      }
+
+      .success-box__sub {
+        font-size: 6px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .header-sign__title {
         font-size: 7px;
+        letter-spacing: 1px;
+      }
+
+      .sdv-box__body {
+        padding: 12px 10px 16px;
+      }
+
+      .field-label,
+      .field-err {
+        padding-left: 38px;
+        font-size: 6px;
+      }
+
+      .sdv-input {
+        padding-left: 38px;
+        font-size: 6px;
+        padding-top: 9px;
+        padding-bottom: 9px;
+      }
+
+      .field-icon {
+        width: 34px;
+        font-size: 12px;
+      }
+
+      .sdv-box__body::before {
+        left: 34px;
       }
     }
   </style>
