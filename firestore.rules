@@ -1,0 +1,53 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Valley Letters Collection ────────────────────────────
+    match /valley_letters/{letter} {
+
+      // PUBLIC CREATE: Anyone can send a letter.
+      // Validates required fields, enforces data types and lengths,
+      // and prevents injecting admin fields.
+      allow create: if
+        // Must have the required fields
+        request.resource.data.keys().hasAll(['name', 'message', 'uid', 'read', 'createdAt', 'category'])
+        // Name must be a non-empty string ≤ 80 chars
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 80
+        // Message must be a non-empty string ≤ 1500 chars
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 1500
+        // Category must be one of the allowed values
+        && request.resource.data.category is string
+        && request.resource.data.category in ['Question', 'Suggestion', 'Feedback', 'Bug Report', 'Collab', 'Just Saying Hi', 'Other']
+        // UID must be a string (browser-generated ID)
+        && request.resource.data.uid is string
+        && request.resource.data.uid.size() > 0
+        && request.resource.data.uid.size() <= 60
+        // 'read' must be set to false on creation
+        && request.resource.data.read == false
+        // createdAt must be the server timestamp
+        && request.resource.data.createdAt == request.time
+        // Contact is optional: must be string or null if present
+        && (
+          !request.resource.data.keys().hasAny(['contact'])
+          || request.resource.data.contact == null
+          || (request.resource.data.contact is string && request.resource.data.contact.size() <= 120)
+        )
+        // No extra fields allowed beyond the known set
+        && request.resource.data.keys().hasOnly(['name', 'message', 'uid', 'read', 'createdAt', 'category', 'contact']);
+
+      // DENY all reads, updates, and deletes from the client.
+      // Only the Firebase Admin SDK (your server / console) can read letters.
+      allow read, update, delete: if false;
+    }
+
+    // ── Deny everything else by default ──────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

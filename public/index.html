@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Valley Post Office</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+
+  /* ================================================================
+  ROOT TOKENS — exact Stardew Valley UI palette
+  ================================================================ */
+  :root {
+  /* SDV parchment/dialogue box */
+  --sdv-parch: #fdedc4;
+  --sdv-parch-dark: #e6c891;
+  --sdv-parch-deep: #cc9959;
+  --sdv-ink: #3a2010;
+  /* SDV greens */
+  --sdv-grass: #5aac2c;
+  --sdv-grass-dark: #3d7d18;
+  --sdv-grass-mid: #4c9424;
+  --sdv-hill: #2e6014;
+  /* SDV sky fall */
+  --sdv-sky1: #f4c87a;
+  --sdv-sky2: #e8a050;
+  --sdv-sky3: #c46030;
+  /* SDV browns (wood) */
+  --sdv-brown1: #6b3a1f;
+  --sdv-brown2: #8b5530;
+  --sdv-brown3: #b87840;
+  /* SDV gold UI (menus) */
+  --sdv-gold: #f0c050;
+  --sdv-gold-dark: #c08030;
+  --sdv-gold-hi: #ffe870;
+  /* SDV dialogue border */
+  --sdv-border: #422811;
+  --sdv-border-hi: #966133;
+  --sdv-border-inset: #ffeccc;
+  /* SDV red */
+  --sdv-red: #d13030;
+  /* shadows */
+  --sdv-shadow: rgba(30, 15, 5, .55);
+  /* font */
+  --fp: "Press Start 2P", monospace;
+  }
+
+  *,
+  *::before,
+  *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  }
+
+  html {
+  scroll-behavior: smooth;
+  }
+
+  body {
+  font-family: var(--fp);
+  background: #1a0e05;
+  min-height: 100vh;
+  overflow-x: hidden;
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none; /* Crisper pixel fonts */
+  font-smooth: never;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect x='0' y='0'
+  width='4' height='12' fill='%23fdedc4'/%3E%3Crect x='4' y='0' width='4' height='4' fill='%23fdedc4'/%3E%3Crect x='0'
+  y='12' width='8' height='4' fill='%23fdedc4'/%3E%3C/svg%3E") 0 0, default;
+  }
+
+  /* ================================================================
+  SCENE — layered parallax farm background
+  ================================================================ */
+  .scene {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  }
+
+  /* Sky gradient — fall dusk */
+  .sky {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  z-index: 0;
+  background: linear-gradient(180deg,
+  #2a1a3a 0%,
+  #4a2a50 10%,
+  #8a3a2a 28%,
+  #c46030 45%,
+  #e8903a 60%,
+  #f4c060 75%,
+  #d4a040 100%);
+  }
+
+  /* Stars twinkling */
+  .stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 55%;
+  z-index: 1;
+  pointer-events: none;
+  }
+
+  .star {
+  position: absolute;
+  background: #fff;
+  image-rendering: pixelated;
+  animation: twinkle var(--dur, 2s) ease-in-out infinite var(--del, 0s);
+  }
+
+  @keyframes twinkle {
+
+  0%,
+  100% {
+  opacity: .9
+  }
+
+  50% {
+  opacity: .1
+  }
+  }
+
+  /* Sun / Moon pixel */
+  .sun {
+  position: fixed;
+  right: 12%;
+  top: 8%;
+  width: 40px;
+  height: 40px;
+  z-index: 2;
+  image-rendering: pixelated;
+  animation: sunFloat 8s ease-in-out infinite;
+  }
+
+  @keyframes sunFloat {
+
+  0%,
+  100% {
+  transform: translateY(0)
+  }
+
+  50% {
+  transform: translateY(-8px)
+  }
+  }
+
+  /* Mountains silhouette */
+  .mountains {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  z-index: 3;
+  pointer-events: none;
+  }
+
+  /* Ground layers */
+  .ground-far {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 32%;
+  background-color: var(--sdv-hill);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect
+  width='8' height='8' fill='%232e6014'/%3E%3Crect width='4' height='4' fill='%23234d0e'/%3E%3Crect x='4' y='4'
+  width='4' height='4' fill='%23234d0e'/%3E%3C/svg%3E");
+  z-index: 4;
+  border-top: 4px solid #1e4008;
+  }
+
+  .ground-mid {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20%;
+  background-color: var(--sdv-grass-dark);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect
+  width='8' height='8' fill='%233d7d18'/%3E%3Crect width='4' height='4' fill='%23326b12'/%3E%3Crect x='4' y='4'
+  width='4' height='4' fill='%23326b12'/%3E%3C/svg%3E");
+  z-index: 5;
+  border-top: 4px solid #1a3205;
+  }
+
+  .ground-near {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 10%;
+  background-color: var(--sdv-grass);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect
+  width='8' height='8' fill='%235aac2c'/%3E%3Crect width='4' height='4' fill='%234c9424'/%3E%3Crect x='4' y='4'
+  width='4' height='4' fill='%234c9424'/%3E%3C/svg%3E");
+  z-index: 6;
+  border-top: 4px solid var(--sdv-grass-dark);
+  }
+
+  /* Falling leaves */
+  .leaves-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  overflow: hidden;
+  }
+
+  .leaf {
+  position: absolute;
+  top: -40px;
+  font-size: 14px;
+  animation: leafFall linear infinite var(--del, 0s);
+  animation-duration: var(--dur, 7s);
+  opacity: .7;
+  filter: sepia(.4) saturate(1.5);
+  }
+
+  @keyframes leafFall {
+  0% {
+  transform: translateY(-40px) rotate(0deg) translateX(0);
+  }
+
+  25% {
+  transform: translateY(25vh) rotate(90deg) translateX(30px);
+  }
+
+  50% {
+  transform: translateY(50vh) rotate(180deg) translateX(-20px);
+  }
+
+  75% {
+  transform: translateY(75vh) rotate(270deg) translateX(40px);
+  }
+
+  100% {
+  transform: translateY(105vh) rotate(360deg) translateX(-10px);
+  }
+  }
+
+  /* Trees pixel art left/right */
+  .tree {
+  position: fixed;
+  bottom: 8%;
+  z-index: 7;
+  image-rendering: pixelated;
+  }
+
+  .tree-l {
+  left: 0;
+  }
+
+  .tree-r {
+  right: 0;
+  }
+
+  /* ================================================================
+  PIXEL SPRITES — built with CSS box-shadow pixel art
+  ================================================================ */
+  /* Mailbox post */
+  .mailbox-wrap {
+  position: fixed;
+  left: 50%;
+  bottom: 9%;
+  transform: translateX(-50%);
+  z-index: 11;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: mailboxWobble 4s ease-in-out infinite;
+  filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.5));
+  }
+
+  @keyframes mailboxWobble {
+
+  0%,
+  100% {
+  transform: translateX(-50%) rotate(-1deg)
+  }
+
+  50% {
+  transform: translateX(-50%) rotate(1deg)
+  }
+  }
+
+  /* ================================================================
+  MAIN CONTENT WRAPPER
+  ================================================================ */
+  .content-wrap {
+  position: relative;
+  z-index: 20;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 120px;
+  }
+
+  /* ================================================================
+  HEADER
+  ================================================================ */
+  .sdv-header {
+  text-align: center;
+  margin-bottom: 28px;
+  animation: headerDrop .6s cubic-bezier(.22, .68, 0, 1.2) both;
+  }
+
+  @keyframes headerDrop {
+  from {
+  opacity: 0;
+  transform: translateY(-30px)
+  }
+
+  to {
+  opacity: 1;
+  transform: none
+  }
+  }
+
+  .header-sign {
+  display: inline-block;
+  background: var(--sdv-brown1);
+  border: 4px solid var(--sdv-border);
+  box-shadow: 4px 4px 0 #1a0a00, 0 8px 32px rgba(0, 0, 0, .7);
+  padding: 0;
+  position: relative;
+  margin-bottom: 8px;
+  }
+
+  .header-sign::before,
+  .header-sign::after {
+  content: "";
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 14px;
+  background: var(--sdv-brown2);
+  border: 2px solid var(--sdv-border);
+  }
+
+  .header-sign__inner {
+  background: linear-gradient(135deg, var(--sdv-brown2), var(--sdv-brown1));
+  padding: 16px 28px;
+  border: 3px solid var(--sdv-border-hi);
+  }
+
+  .header-sign__title {
+  font-size: clamp(8px, 2vw, 14px);
+  color: var(--sdv-gold);
+  text-shadow: 2px 2px 0 var(--sdv-gold-dark), 0 0 20px rgba(240, 184, 64, .5);
+  letter-spacing: 3px;
+  white-space: nowrap;
+  }
+
+  .header-sign__sub {
+  font-size: 6px;
+  color: var(--sdv-parch);
+  opacity: .8;
+  margin-top: 8px;
+  letter-spacing: 1px;
+  }
+
+  .sign-post {
+  width: 8px;
+  height: 32px;
+  background: var(--sdv-brown2);
+  border-left: 2px solid var(--sdv-border);
+  border-right: 2px solid var(--sdv-border);
+  margin: 0 auto;
+  box-shadow: 2px 0 0 #1a0a00;
+  }
+
+  /* ================================================================
+  SDV DIALOGUE / FORM BOX
+  ================================================================ */
+  .sdv-dialog {
+  width: 100%;
+  max-width: 680px;
+  position: relative;
+  animation: dialogRise .5s cubic-bezier(.22, .68, 0, 1.2) .15s both;
+  }
+
+  @keyframes dialogRise {
+  from {
+  opacity: 0;
+  transform: translateY(24px) scale(.96)
+  }
+
+  to {
+  opacity: 1;
+  transform: none
+  }
+  }
+
+  /* The iconic SDV dialogue / menu box */
+  .sdv-box {
+  background: var(--sdv-parch);
+  border: 6px solid var(--sdv-border);
+  border-radius: 4px; /* Slight rounding for authenticity */
+  box-shadow:
+  inset 4px 4px 0 var(--sdv-border-inset),
+  inset -4px -4px 0 var(--sdv-parch-dark),
+  6px 6px 0 rgba(0,0,0,0.5),
+  0 24px 64px rgba(0,0,0,.8);
+  position: relative;
+  overflow: hidden;
+  }
+
+  /* SDV box corner pegs */
+  .sdv-box::before,
+  .sdv-box::after,
+  .sdv-box-peg-bl,
+  .sdv-box-peg-br {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--sdv-brown1);
+  border: 2px solid var(--sdv-border);
+  border-radius: 50%;
+  z-index: 10;
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3);
+  }
+
+  .sdv-box::before { top: 6px; left: 6px; }
+  .sdv-box::after { top: 6px; right: 6px; }
+  .sdv-box-peg-bl { bottom: 6px; left: 6px; position: absolute; }
+  .sdv-box-peg-br { bottom: 6px; right: 6px; position: absolute; }
+
+  /* Wooden header plate attached to the letter */
+  .sdv-box__header {
+  background: var(--sdv-brown2);
+  box-shadow:
+  inset 4px 4px 0 var(--sdv-brown3),
+  inset -4px -4px 0 var(--sdv-brown1),
+  0 4px 0 var(--sdv-border);
+  margin: 16px 24px 0;
+  padding: 16px 20px;
+  text-align: center;
+  position: relative;
+  border: 4px solid var(--sdv-border);
+  }
+
+  .sdv-box__header-icon {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 8px;
+  animation: bounce 2s ease-in-out infinite;
+  filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, .5));
+  }
+
+  @keyframes bounce {
+
+  0%,
+  100% {
+  transform: translateY(0)
+  }
+
+  50% {
+  transform: translateY(-6px)
+  }
+  }
+
+  .sdv-box__header-title {
+  font-size: clamp(8px, 2vw, 11px);
+  color: var(--sdv-gold);
+  text-shadow: 2px 2px 0 var(--sdv-gold-dark);
+  letter-spacing: 2px;
+  }
+
+  .sdv-box__header-sub {
+  font-size: 6px;
+  color: var(--sdv-parch);
+  opacity: .75;
+  margin-top: 8px;
+  letter-spacing: 1px;
+  line-height: 1.8;
+  }
+
+  /* Paper-lined body */
+  .sdv-box__body {
+  padding: 24px 32px 32px;
+  background: var(--sdv-parch);
+  position: relative;
+  }
+
+  /* Margin line left, like a real letter */
+  .sdv-box__body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 36px;
+  bottom: 0;
+  width: 2px;
+  background: rgba(200, 100, 80, .25); /* Faint red margin line */
+  }
+
+  /* ================================================================
+  FORM FIELDS
+  ================================================================ */
+  .field {
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 2;
+  }
+
+  .field-label {
+  display: block;
+  font-size: 7px;
+  color: var(--sdv-brown1);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  padding-left: 20px;
+  }
+
+  .field-label span {
+  color: var(--sdv-red);
+  }
+
+  .sdv-input {
+  width: 100%;
+  font-family: var(--fp);
+  font-size: clamp(6px, 1.5vw, 8px);
+  color: var(--sdv-ink);
+  /* SDV input slot styling */
+  background: #f4dca6;
+  border: 4px solid var(--sdv-border);
+  border-radius: 0;
+  padding: 12px 14px 12px 56px;
+  outline: none;
+  image-rendering: pixelated;
+  box-shadow:
+  inset 4px 4px 0 rgba(0,0,0,0.1),
+  inset -4px -4px 0 rgba(255,255,255,0.4);
+  transition: background .15s;
+  -webkit-appearance: none;
+  appearance: none;
+  }
+
+  .sdv-input:focus {
+  background: #fff8e8;
+  /* Glowing cursor border effect from SDV menus */
+  box-shadow:
+  inset 4px 4px 0 rgba(0,0,0,0.1),
+  inset -4px -4px 0 rgba(255,255,255,0.4),
+  0 0 0 4px var(--sdv-gold),
+  0 0 0 8px rgba(240,192,80,0.3);
+  }
+
+  .sdv-input::placeholder {
+  color: rgba(90, 50, 20, .4);
+  font-size: 6px;
+  }
+
+  .sdv-textarea {
+  resize: vertical;
+  min-height: 140px;
+  line-height: 24px;
+  padding-top: 14px;
+  padding-left: 14px; /* No icon prefix for text area to give full writing space */
+  background: repeating-linear-gradient(
+  transparent, transparent 23px,
+  rgba(100,50,20,0.1) 23px,
+  rgba(100,50,20,0.1) 24px
+  );
+  background-color: #f4dca6;
+  background-attachment: local; /* lines scroll with text */
+  }
+  .sdv-textarea:focus {
+  background-color: #fff8e8;
+  }
+
+  /* field with icon prefix */
+  .field-inner {
+  position: relative;
+  }
+
+  .field-icon {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  bottom: 4px;
+  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  background: var(--sdv-brown2);
+  border: 2px solid var(--sdv-border);
+  box-shadow: inset 2px 2px 0 var(--sdv-brown3);
+  pointer-events: none;
+  }
+
+  .char-counter {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 6px;
+  color: var(--sdv-brown2);
+  margin-top: 4px;
+  padding-right: 4px;
+  transition: color .2s;
+  }
+
+  .char-counter.warn {
+  color: #c07010;
+  }
+
+  .char-counter.danger {
+  color: var(--sdv-red);
+  }
+
+  /* ================================================================
+  SDV SEND BUTTON (Chunky Wood Block)
+  ================================================================ */
+  .sdv-btn {
+  font-family: var(--fp);
+  font-size: 9px;
+  border: 4px solid var(--sdv-border);
+  border-radius: 0;
+  cursor: pointer;
+  padding: 14px 24px;
+  image-rendering: pixelated;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.05s ease;
+  }
+
+  .sdv-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+  }
+
+  .sdv-btn--send {
+  width: 100%;
+  justify-content: center;
+  background: var(--sdv-brown2);
+  color: var(--sdv-parch);
+  text-shadow: 2px 2px 0 var(--sdv-border);
+  font-size: 9px;
+  padding: 18px;
+  box-shadow:
+  inset 4px 4px 0 var(--sdv-brown3),
+  inset -4px -4px 0 var(--sdv-brown1),
+  0 8px 0 var(--sdv-border),
+  0 12px 16px rgba(0,0,0,0.4);
+  position: relative;
+  overflow: hidden;
+  margin-top: 16px;
+  }
+
+  /* Pixel hover/active states */
+  .sdv-btn--send:hover:not(:disabled) {
+  background: var(--sdv-brown3);
+  box-shadow:
+  inset 4px 4px 0 #d99152,
+  inset -4px -4px 0 var(--sdv-brown2),
+  0 8px 0 var(--sdv-border),
+  0 12px 16px rgba(0,0,0,0.4);
+  }
+
+  .sdv-btn--send:active:not(:disabled) {
+  transform: translateY(6px); /* Push down */
+  box-shadow:
+  inset 4px 4px 0 var(--sdv-brown1),
+  inset -4px -4px 0 var(--sdv-brown3),
+  0 2px 0 var(--sdv-border), /* shadow shortens */
+  0 4px 8px rgba(0,0,0,0.4);
+  }
+
+  /* ================================================================
+  VALIDATION ERROR MESSAGES (SDV speech style)
+  ================================================================ */
+  .field-err {
+  font-size: 6px;
+  color: var(--sdv-red);
+  margin-top: 5px;
+  padding-left: 52px;
+  display: none;
+  animation: errShake .3s ease;
+  }
+
+  .field-err.show {
+  display: block;
+  }
+
+  @keyframes errShake {
+
+  0%,
+  100% {
+  transform: translateX(0)
+  }
+
+  25% {
+  transform: translateX(-6px)
+  }
+
+  75% {
+  transform: translateX(6px)
+  }
+  }
+
+  /* ================================================================
+  DELIVERY ANIMATION OVERLAY
+  ================================================================ */
+  .delivery-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+  opacity: 0;
+  background: rgba(20, 10, 2, .0);
+  transition: background .5s;
+  overflow: hidden;
+  }
+
+  .delivery-overlay.active {
+  pointer-events: all;
+  opacity: 1;
+  background: rgba(20, 10, 2, .55);
+  }
+
+  /* Ground strip for walking scene */
+  .delivery-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 18%;
+  background: linear-gradient(180deg, var(--sdv-grass) 0%, var(--sdv-grass-dark) 100%);
+  border-top: 4px solid var(--sdv-grass-dark);
+  }
+
+  .delivery-ground::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--sdv-grass-mid);
+  }
+
+  /* Path the postman walks on */
+  .delivery-path {
+  position: absolute;
+  bottom: 18%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: repeating-linear-gradient(90deg, var(--sdv-parch-deep) 0 16px, transparent 16px 24px);
+  opacity: .4;
+  }
+
+  /* Message box at top */
+  .delivery-msg {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--sdv-parch);
+  border: 4px solid var(--sdv-border);
+  box-shadow: 6px 6px 0 var(--sdv-border);
+  padding: 16px 24px;
+  text-align: center;
+  max-width: 360px;
+  width: 90%;
+  opacity: 0;
+  transform: translateX(-50%) translateY(-20px);
+  transition: opacity .4s .3s, transform .4s .3s;
+  }
+
+  .delivery-overlay.active .delivery-msg {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  }
+
+  .delivery-msg__text {
+  font-size: 8px;
+  color: var(--sdv-brown1);
+  line-height: 2;
+  }
+
+  .delivery-msg::before,
+  .delivery-msg::after {
+  content: "✦";
+  position: absolute;
+  font-size: 10px;
+  color: var(--sdv-gold);
+  }
+
+  .delivery-msg::before {
+  top: 6px;
+  left: 8px;
+  }
+
+  .delivery-msg::after {
+  top: 6px;
+  right: 8px;
+  }
+
+  /* ── POSTMAN character (pixel CSS art) ─────────────────────────── */
+  .postman {
+  position: absolute;
+  bottom: calc(18% + 2px);
+  left: -120px;
+  width: 56px;
+  height: 80px;
+  animation: postmanWalk 3.4s cubic-bezier(.4, 0, .6, 1) .4s forwards;
+  transform-origin: bottom center;
+  }
+
+  @keyframes postmanWalk {
+  0% {
+  left: -120px;
+  transform: translateY(0);
+  }
+
+  10% {
+  transform: translateY(-4px);
+  }
+
+  20% {
+  transform: translateY(0);
+  }
+
+  30% {
+  transform: translateY(-4px);
+  }
+
+  40% {
+  transform: translateY(0);
+  }
+
+  50% {
+  transform: translateY(-4px);
+  }
+
+  60% {
+  transform: translateY(0);
+  }
+
+  70% {
+  transform: translateY(-4px);
+  }
+
+  80% {
+  transform: translateY(0);
+  }
+
+  90% {
+  transform: translateY(-3px);
+  }
+
+  100% {
+  left: calc(50% - 90px);
+  transform: translateY(0);
+  }
+  }
+
+  /* ── FARMER character (receives mail) ──────────────────────────── */
+  .farmer {
+  position: absolute;
+  bottom: calc(18% + 2px);
+  right: clamp(40px, 8vw, 100px);
+  width: 48px;
+  height: 72px;
+  animation: farmerWave 1s ease-in-out 3.5s infinite alternate;
+  }
+
+  @keyframes farmerWave {
+  0% {
+  transform: scaleX(-1);
+  }
+
+  100% {
+  transform: scaleX(-1) translateY(-4px);
+  }
+  }
+
+  /* ── envelope flying ────────────────────────────────────────────── */
+  .flying-env {
+  position: absolute;
+  font-size: 28px;
+  bottom: calc(18% + 48px);
+  left: calc(50% - 60px);
+  opacity: 0;
+  animation: envFly 1s ease-out 3.5s both;
+  filter: drop-shadow(2px 4px 0 rgba(0, 0, 0, .4));
+  }
+
+  @keyframes envFly {
+  0% {
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
+  }
+
+  40% {
+  transform: translate(40px, -30px) scale(1.3);
+  }
+
+  100% {
+  opacity: 0;
+  transform: translate(90px, -10px) scale(.6);
+  }
+  }
+
+  /* Postman walking leg animation using transforms */
+  .postman-sprite,
+  .farmer-sprite {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  }
+
+  /* ================================================================
+  SUCCESS STATE
+  ================================================================ */
+  .success-box {
+  display: none;
+  text-align: center;
+  padding: 32px 24px;
+  animation: successPop .5s cubic-bezier(.22, .68, 0, 1.3) both;
+  }
+
+  .success-box.show {
+  display: block;
+  }
+
+  @keyframes successPop {
+  from {
+  opacity: 0;
+  transform: scale(.7)
+  }
+
+  to {
+  opacity: 1;
+  transform: none
+  }
+  }
+
+  .success-box__icon {
+  font-size: 56px;
+  display: block;
+  margin-bottom: 16px;
+  animation: starSpin 1s ease .3s both;
+  }
+
+  @keyframes starSpin {
+  from {
+  transform: rotate(-180deg) scale(0)
+  }
+
+  to {
+  transform: none
+  }
+  }
+
+  .success-box__title {
+  font-size: 12px;
+  color: var(--sdv-brown1);
+  margin-bottom: 12px;
+  line-height: 1.8;
+  }
+
+  .success-box__sub {
+  font-size: 7px;
+  color: var(--sdv-brown2);
+  line-height: 2;
+  margin-bottom: 24px;
+  }
+
+  .success-stars {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  }
+
+  .success-stars span {
+  font-size: 20px;
+  animation: starFloat 1s ease both;
+  }
+
+  .success-stars span:nth-child(2) {
+  animation-delay: .1s;
+  }
+
+  .success-stars span:nth-child(3) {
+  animation-delay: .2s;
+  }
+
+  .success-stars span:nth-child(4) {
+  animation-delay: .3s;
+  }
+
+  .success-stars span:nth-child(5) {
+  animation-delay: .4s;
+  }
+
+  @keyframes starFloat {
+  from {
+  opacity: 0;
+  transform: translateY(16px)
+  }
+
+  to {
+  opacity: 1;
+  transform: none
+  }
+  }
+
+  /* ================================================================
+  TOAST NOTIFICATION
+  ================================================================ */
+  .toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--sdv-parch);
+  border: 3px solid var(--sdv-border);
+  box-shadow: 4px 4px 0 var(--sdv-border);
+  padding: 12px 20px;
+  font-size: 7px;
+  color: var(--sdv-brown1);
+  z-index: 200;
+  white-space: nowrap;
+  opacity: 0;
+  transition: transform .3s cubic-bezier(.22, .68, 0, 1.3), opacity .3s;
+  pointer-events: none;
+  }
+
+  .toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  }
+
+  .toast.err {
+  background: #fff0ee;
+  border-color: var(--sdv-red);
+  color: var(--sdv-red);
+  }
+
+  /* ================================================================
+  PIXEL ART DECORATIVE SVG TREES (inline)
+  ================================================================ */
+  .deco-tree {
+  position: fixed;
+  bottom: 8%;
+  width: clamp(60px, 8vw, 100px);
+  z-index: 8;
+  image-rendering: pixelated;
+  filter: drop-shadow(4px 0 0 rgba(0, 0, 0, .3));
+  }
+
+  .deco-tree-l {
+  left: 0;
+  }
+
+  .deco-tree-r {
+  right: 0;
+  transform: scaleX(-1);
+  }
+
+  /* ================================================================
+  FOOTER
+  ================================================================ */
+  .sdv-footer {
+  margin-top: 28px;
+  font-size: 6px;
+  color: rgba(245, 230, 200, .35);
+  text-align: center;
+  letter-spacing: 2px;
+  }
+
+  /* ================================================================
+  SCROLLBAR
+  ================================================================ */
+  ::-webkit-scrollbar {
+  width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+  background: var(--sdv-brown1);
+  }
+
+  ::-webkit-scrollbar-thumb {
+  background: var(--sdv-brown3);
+  border-radius: 0;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+  background: var(--sdv-gold-dark);
+  }
+
+  /* ================================================================
+  RESPONSIVE
+  ================================================================ */
+  @media(max-width:520px) {
+  .sdv-box__body {
+  padding: 16px 12px;
+  }
+
+  .field-label,
+  .field-err {
+  padding-left: 42px;
+  }
+
+  .sdv-input {
+  padding-left: 42px;
+  }
+
+  .field-icon {
+  width: 38px;
+  }
+
+  .sdv-box__body::before {
+  left: 38px;
+  }
+
+  .header-sign__title {
+  font-size: 7px;
+  }
+  }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══════════════════════════ SCENE LAYERS ═══════════════════════ -->
+  <div class="scene">
+    <div class="sky"></div>
+
+    <!-- Stars -->
+    <div class="stars" id="starsLayer"></div>
+
+    <!-- Sun pixel -->
+    <svg class="sun" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <rect x="16" y="0" width="8" height="4" fill="#f0d060" />
+      <rect x="16" y="36" width="8" height="4" fill="#f0d060" />
+      <rect x="0" y="16" width="4" height="8" fill="#f0d060" />
+      <rect x="36" y="16" width="4" height="8" fill="#f0d060" />
+      <rect x="4" y="4" width="4" height="4" fill="#f0d060" />
+      <rect x="32" y="4" width="4" height="4" fill="#f0d060" />
+      <rect x="4" y="32" width="4" height="4" fill="#f0d060" />
+      <rect x="32" y="32" width="4" height="4" fill="#f0d060" />
+      <rect x="8" y="8" width="24" height="24" fill="#ffe840" />
+      <rect x="12" y="12" width="16" height="16" fill="#fff070" />
+    </svg>
+
+    <!-- Pixel mountains SVG -->
+    <svg class="mountains" viewBox="0 0 1440 400" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <polygon
+        points="0,400 0,220 120,80 240,180 360,60 480,160 600,30 720,140 840,50 960,170 1080,40 1200,160 1320,70 1440,180 1440,400"
+        fill="#1e4008" />
+      <polygon
+        points="0,400 0,280 100,160 200,240 320,120 440,220 560,100 680,200 800,120 920,230 1040,100 1160,220 1280,130 1440,250 1440,400"
+        fill="#2e6014" />
+    </svg>
+
+    <div class="ground-far"></div>
+    <div class="ground-mid"></div>
+    <div class="ground-near"></div>
+
+    <!-- Pixel trees SVG left -->
+    <svg class="deco-tree deco-tree-l" viewBox="0 0 64 120" xmlns="http://www.w3.org/2000/svg">
+      <!-- trunk -->
+      <rect x="24" y="80" width="16" height="40" fill="#6b3a1f" />
+      <rect x="28" y="80" width="4" height="40" fill="#8b5530" />
+      <!-- foliage layers -->
+      <rect x="8" y="60" width="48" height="28" fill="#2d6b0e" />
+      <rect x="4" y="64" width="56" height="4" fill="#1e4a08" />
+      <rect x="12" y="40" width="40" height="24" fill="#3d8010" />
+      <rect x="8" y="44" width="48" height="4" fill="#2d6b0e" />
+      <rect x="18" y="20" width="28" height="24" fill="#4a9818" />
+      <rect x="14" y="24" width="36" height="4" fill="#3d8010" />
+      <rect x="22" y="4" width="20" height="20" fill="#5ab020" />
+      <!-- highlights -->
+      <rect x="24" y="6" width="8" height="4" fill="#70c830" />
+      <rect x="20" y="22" width="8" height="4" fill="#70c830" />
+      <!-- fall orange leaves scattered -->
+      <rect x="4" y="58" width="4" height="4" fill="#e08020" />
+      <rect x="52" y="62" width="4" height="4" fill="#c05010" />
+      <rect x="16" y="38" width="4" height="4" fill="#e8a030" />
+    </svg>
+
+    <!-- Pixel trees SVG right (mirrored) -->
+    <svg class="deco-tree deco-tree-r" viewBox="0 0 64 120" xmlns="http://www.w3.org/2000/svg">
+      <rect x="24" y="80" width="16" height="40" fill="#6b3a1f" />
+      <rect x="28" y="80" width="4" height="40" fill="#8b5530" />
+      <rect x="8" y="60" width="48" height="28" fill="#2d6b0e" />
+      <rect x="4" y="64" width="56" height="4" fill="#1e4a08" />
+      <rect x="12" y="40" width="40" height="24" fill="#3d8010" />
+      <rect x="8" y="44" width="48" height="4" fill="#2d6b0e" />
+      <rect x="18" y="20" width="28" height="24" fill="#4a9818" />
+      <rect x="14" y="24" width="36" height="4" fill="#3d8010" />
+      <rect x="22" y="4" width="20" height="20" fill="#5ab020" />
+      <rect x="24" y="6" width="8" height="4" fill="#70c830" />
+      <rect x="20" y="22" width="8" height="4" fill="#70c830" />
+      <rect x="4" y="58" width="4" height="4" fill="#e08020" />
+      <rect x="52" y="62" width="4" height="4" fill="#c05010" />
+    </svg>
+
+    <!-- Falling leaves -->
+    <div class="leaves-layer" id="leavesLayer"></div>
+
+    <!-- ════════════════ MAIN CONTENT ═══════════════════════════ -->
+    <div class="content-wrap">
+
+      <!-- HEADER SIGN -->
+      <header class="sdv-header">
+        <div class="header-sign">
+          <div class="header-sign__inner">
+            <div class="header-sign__title">📮 VALLEY POST OFFICE</div>
+            <div class="header-sign__sub">Drop a letter · Ask anything · Say hello</div>
+          </div>
+        </div>
+        <div class="sign-post"></div>
+      </header>
+
+      <!-- DIALOGUE BOX FORM -->
+      <div class="sdv-dialog">
+        <div class="sdv-box">
+          <div class="sdv-box__topband"></div>
+
+          <!-- Header area -->
+          <div class="sdv-box__header">
+            <span class="sdv-box__header-icon">✉️</span>
+            <div class="sdv-box__header-title">Write a Letter</div>
+            <div class="sdv-box__header-sub">Leave a message — I'll read every single one 🌾</div>
+          </div>
+
+          <!-- Form body -->
+          <div class="sdv-box__body" id="formBody">
+
+            <!-- Name -->
+            <div class="field">
+              <label class="field-label" for="inp-name">YOUR NAME <span>*</span></label>
+              <div class="field-inner">
+                <div class="field-icon">🧑</div>
+                <input class="sdv-input" id="inp-name" type="text" placeholder="Farmer's name..." maxlength="80"
+                  autocomplete="name" />
+              </div>
+              <div class="field-err" id="err-name">⚠ Please enter your name!</div>
+            </div>
+
+            <!-- Contact -->
+            <div class="field">
+              <label class="field-label" for="inp-contact">EMAIL OR WHATSAPP <span
+                  style="color:var(--sdv-brown2);font-size:5px;">(optional)</span></label>
+              <div class="field-inner">
+                <div class="field-icon">📱</div>
+                <input class="sdv-input" id="inp-contact" type="text" placeholder="So I can write back..."
+                  maxlength="120" autocomplete="email" />
+              </div>
+              <div class="field-err" id="err-contact">⚠ Please enter a valid email or phone number!</div>
+            </div>
+
+            <!-- Category -->
+            <div class="field">
+              <label class="field-label" for="inp-cat">CATEGORY</label>
+              <div class="field-inner">
+                <div class="field-icon">📋</div>
+                <select class="sdv-input" id="inp-cat" style="cursor:pointer;">
+                  <option value="Question">❓ Question</option>
+                  <option value="Suggestion">💡 Suggestion</option>
+                  <option value="Feedback">🌟 Feedback</option>
+                  <option value="Bug Report">🐛 Bug Report</option>
+                  <option value="Collab">🤝 Collaboration</option>
+                  <option value="Just Saying Hi">👋 Just Saying Hi!</option>
+                  <option value="Other">📦 Other</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Message -->
+            <div class="field">
+              <label class="field-label" for="inp-msg">YOUR MESSAGE <span>*</span></label>
+              <div class="field-inner">
+                <div class="field-icon" style="align-items:flex-start;padding-top:12px;">📝</div>
+                <textarea class="sdv-input sdv-textarea" id="inp-msg"
+                  placeholder="Dear farmer... pour your heart out here 🌻&#10;(Up to 1500 characters)"
+                  maxlength="1500"></textarea>
+              </div>
+              <div class="char-counter" id="charCount">0 / 1500</div>
+              <div class="field-err" id="err-msg">⚠ Please write your message!</div>
+            </div>
+
+            <!-- Send button -->
+            <button class="sdv-btn sdv-btn--send" id="sendBtn" onclick="sendLetter()">
+              <span style="font-size:18px;">📮</span>
+              <span>SEND LETTER</span>
+            </button>
+
+          </div><!-- /formBody -->
+
+          <!-- Success state (hidden until sent) -->
+          <div class="sdv-box__body success-box" id="successBox">
+            <span class="success-box__icon">🎉</span>
+            <div class="success-stars">
+              <span>⭐</span><span>🌟</span><span>✨</span><span>🌟</span><span>⭐</span>
+            </div>
+            <div class="success-box__title">LETTER DELIVERED!</div>
+            <div class="success-box__sub">
+              Your letter has been safely delivered<br />
+              to the Valley Post Office 📬<br /><br />
+              I'll read it and get back to you soon!<br />
+              Thanks for writing, farmer 🌾
+            </div>
+            <button class="sdv-btn sdv-btn--send" onclick="resetForm()" style="font-size:7px;padding:12px;">
+              <span style="font-size:14px;">✏️</span>
+              <span>WRITE ANOTHER</span>
+            </button>
+          </div>
+
+          <div class="sdv-box__bottomband"></div>
+        </div>
+      </div>
+
+      <footer class="sdv-footer">
+        <p>🌾 &nbsp; VALLEY POST OFFICE &nbsp; · &nbsp; EST. YEAR 1 &nbsp; 🌾</p>
+      </footer>
+
+    </div><!-- /content-wrap -->
+  </div><!-- /scene -->
+
+  <!-- ══════════════════════ DELIVERY ANIMATION OVERLAY ══════════════ -->
+  <div class="delivery-overlay" id="deliveryOverlay">
+
+    <div class="delivery-msg">
+      <div class="delivery-msg__text" id="deliveryText">
+        📬 &nbsp; SENDING YOUR LETTER... &nbsp; 📬
+      </div>
+    </div>
+
+    <!-- Ground and path for walking -->
+    <div class="delivery-ground"></div>
+    <div class="delivery-path"></div>
+
+    <!-- Pixel Postman SVG character walking -->
+    <div class="postman" id="postmanEl">
+      <svg class="postman-sprite" id="postmanSvg" viewBox="0 0 48 72" xmlns="http://www.w3.org/2000/svg">
+        <!-- Hat -->
+        <rect x="10" y="0" width="28" height="4" fill="#4a2c10" />
+        <rect x="8" y="4" width="32" height="4" fill="#6b3a1f" />
+        <rect x="12" y="8" width="24" height="2" fill="#4a2c10" />
+        <!-- Head -->
+        <rect x="12" y="10" width="24" height="20" fill="#f5c9a0" />
+        <!-- Eyes -->
+        <rect x="16" y="16" width="4" height="4" fill="#3a2010" />
+        <rect x="28" y="16" width="4" height="4" fill="#3a2010" />
+        <!-- Mouth smile -->
+        <rect x="18" y="24" width="12" height="2" fill="#c07050" />
+        <rect x="16" y="22" width="4" height="2" fill="#c07050" />
+        <rect x="28" y="22" width="4" height="2" fill="#c07050" />
+        <!-- Body / uniform dark blue -->
+        <rect x="10" y="30" width="28" height="24" fill="#2a3a8a" />
+        <rect x="10" y="30" width="28" height="4" fill="#1a2a7a" />
+        <!-- Gold buttons -->
+        <rect x="22" y="34" width="4" height="4" fill="#f0b840" />
+        <rect x="22" y="40" width="4" height="4" fill="#f0b840" />
+        <!-- Arms -->
+        <rect x="0" y="30" width="10" height="16" fill="#2a3a8a" />
+        <rect x="38" y="30" width="10" height="16" fill="#2a3a8a" />
+        <!-- Hands -->
+        <rect x="0" y="44" width="10" height="8" fill="#f5c9a0" />
+        <rect x="38" y="44" width="10" height="8" fill="#f5c9a0" />
+        <!-- Envelope in right hand -->
+        <rect x="36" y="38" width="16" height="12" fill="#f5e6c8" />
+        <rect x="36" y="38" width="16" height="2" fill="#c8ae78" />
+        <rect x="36" y="48" width="16" height="2" fill="#c8ae78" />
+        <rect x="36" y="38" width="2" height="12" fill="#c8ae78" />
+        <rect x="50" y="38" width="2" height="12" fill="#c8ae78" />
+        <!-- X on envelope -->
+        <rect x="40" y="40" width="4" height="2" fill="#e8a030" />
+        <rect x="44" y="42" width="4" height="2" fill="#e8a030" />
+        <rect x="44" y="40" width="4" height="2" fill="#e8a030" />
+        <rect x="40" y="42" width="4" height="2" fill="#e8a030" />
+        <!-- Legs -->
+        <rect x="14" y="54" width="10" height="18" fill="#1a2a6a" id="legL" />
+        <rect x="24" y="54" width="10" height="18" fill="#1a2a6a" id="legR" />
+        <!-- Shoes -->
+        <rect x="12" y="68" width="14" height="4" fill="#2a1808" />
+        <rect x="22" y="68" width="14" height="4" fill="#2a1808" />
+      </svg>
+    </div>
+
+    <!-- Flying envelope -->
+    <div class="flying-env" id="flyingEnv">✉️</div>
+
+    <!-- Pixel Farmer SVG (receiver) -->
+    <div class="farmer" id="farmerEl">
+      <svg class="farmer-sprite" viewBox="0 0 40 64" xmlns="http://www.w3.org/2000/svg">
+        <!-- Straw hat -->
+        <rect x="4" y="0" width="32" height="4" fill="#c8a030" />
+        <rect x="8" y="4" width="24" height="4" fill="#e8c040" />
+        <rect x="10" y="8" width="20" height="2" fill="#c8a030" />
+        <!-- Head -->
+        <rect x="10" y="10" width="20" height="18" fill="#f5c9a0" />
+        <!-- Eyes (happy, squinting) -->
+        <rect x="13" y="15" width="4" height="2" fill="#3a2010" />
+        <rect x="23" y="15" width="4" height="2" fill="#3a2010" />
+        <!-- Smile -->
+        <rect x="14" y="22" width="12" height="2" fill="#c07050" />
+        <!-- Blush -->
+        <rect x="10" y="20" width="4" height="2" fill="#e8a080" opacity=".6" />
+        <rect x="26" y="20" width="4" height="2" fill="#e8a080" opacity=".6" />
+        <!-- Body — green shirt -->
+        <rect x="8" y="28" width="24" height="20" fill="#3a8020" />
+        <rect x="8" y="28" width="24" height="4" fill="#2a6010" />
+        <!-- Brown pants -->
+        <rect x="10" y="48" width="20" height="16" fill="#6b3a1f" />
+        <!-- Arms up (waving) -->
+        <rect x="0" y="28" width="8" height="12" fill="#3a8020" />
+        <rect x="32" y="20" width="8" height="20" fill="#3a8020" />
+        <!-- Hands -->
+        <rect x="0" y="38" width="8" height="6" fill="#f5c9a0" />
+        <rect x="32" y="38" width="8" height="6" fill="#f5c9a0" />
+        <!-- Shoes -->
+        <rect x="8" y="60" width="12" height="4" fill="#2a1808" />
+        <rect x="20" y="60" width="12" height="4" fill="#2a1808" />
+      </svg>
+    </div>
+
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toastEl"></div>
+
+  <!-- ══════════════════════════ FIREBASE + JS ════════════════════════ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    /* ╔══════════════════════════════════════════╗
+       ║  🔥 VALLEY MAIL — FIREBASE CONFIG        ║
+       ╚══════════════════════════════════════════╝ */
+    const firebaseConfig = {
+      apiKey: "AIzaSyB2mtAuuQ3pMz_rCoUKKM0tpqedEcY_m9JY",
+      authDomain: "valley-mail.firebaseapp.com",
+      projectId: "valley-mail",
+      storageBucket: "valley-mail.firebasestorage.app",
+      messagingSenderId: "663200969338",
+      appId: "1:663200969338:web:386a3d7da472a2f294c1c3"
+    };
+
+    let db;
+    try {
+      // If we are on Firebase Hosting, we can sometimes auto-init, 
+      // but explicit config is safer for multi-environment setups.
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      console.log("🌲 Valley Post Office: Firebase Initialized");
+    } catch (e) {
+      console.error("❌ Firebase Startup Error:", e);
+      window.firebaseError = e;
+    }
+
+    /* ── Unique browser ID ─────────────────────────────────────── */
+    function getBrowserId() {
+      let id = localStorage.getItem("vp_uid");
+      if (!id) { id = "u_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); localStorage.setItem("vp_uid", id); }
+      return id;
+    }
+
+    /* ── Expose sendLetter to window ───────────────────────────── */
+    window.sendLetter = async function () {
+      const name = document.getElementById("inp-name").value.trim();
+      const contact = document.getElementById("inp-contact").value.trim();
+      const cat = document.getElementById("inp-cat").value;
+      const msg = document.getElementById("inp-msg").value.trim();
+
+      // Validate
+      let valid = true;
+      const show = (id, show) => {
+        const el = document.getElementById(id);
+        if (show) { el.classList.add("show"); valid = false; }
+        else el.classList.remove("show");
+      };
+
+      show("err-name", !name);
+      show("err-msg", !msg);
+
+      // Optional contact: if provided must loosely look like email or phone
+      if (contact) {
+        const looksValid = /^[\w.+%-]+@[\w.-]+\.[a-z]{2,}$/i.test(contact)
+          || /^[+\d\s\-().]{6,20}$/.test(contact);
+        show("err-contact", !looksValid);
+      } else {
+        show("err-contact", false);
+      }
+
+      if (!valid) { showToast("⚠ Please fix the fields above!", true); return; }
+
+      // Lock button
+      const btn = document.getElementById("sendBtn");
+      btn.disabled = true;
+      btn.innerHTML = '<span style="font-size:14px;">⏳</span><span>SENDING...</span>';
+
+      // Start delivery animation
+      startDelivery();
+
+      // Firebase write
+      try {
+        if (!db) throw new Error("Firebase not initialized. Check console for errors.");
+        await addDoc(collection(db, "valley_letters"), {
+          name,
+          contact: contact || null,
+          category: cat,
+          message: msg,
+          uid: getBrowserId(),
+          read: false,
+          createdAt: serverTimestamp()
+        });
+        finishDelivery(true);
+      } catch (e) {
+        console.error("💌 Delivery Error:", e);
+        // Provide a more helpful error message for common issues
+        let userMsg = e.message;
+        if (e.message.includes("permission-denied")) userMsg = "Firestore Rules denied the write. Check your security rules!";
+        if (e.message.includes("configured")) userMsg = "Please add your Firebase credentials to the code.";
+
+        finishDelivery(false, userMsg);
+      }
+    };
+
+    window.resetForm = function () {
+      document.getElementById("formBody").style.display = "";
+      document.getElementById("successBox").classList.remove("show");
+      document.getElementById("inp-name").value = "";
+      document.getElementById("inp-contact").value = "";
+      document.getElementById("inp-msg").value = "";
+      document.getElementById("charCount").textContent = "0 / 1500";
+      document.getElementById("charCount").className = "char-counter";
+      document.getElementById("sendBtn").disabled = false;
+      document.getElementById("sendBtn").innerHTML = '<span style="font-size:18px;">📮</span><span>SEND LETTER</span>';
+    };
+
+    /* ── Char counter ───────────────────────────────────────────── */
+    document.getElementById("inp-msg").addEventListener("input", function () {
+      const len = this.value.length;
+      const el = document.getElementById("charCount");
+      el.textContent = len + " / 1500";
+      el.className = "char-counter" + (len > 1400 ? " danger" : len > 1200 ? " warn" : "");
+    });
+
+    /* ── Clear error on focus ──────────────────────────────────── */
+    ["inp-name", "inp-contact", "inp-msg"].forEach(id => {
+      document.getElementById(id)?.addEventListener("focus", () => {
+        const errMap = { "inp-name": "err-name", "inp-contact": "err-contact", "inp-msg": "err-msg" };
+        document.getElementById(errMap[id])?.classList.remove("show");
+      });
+    });
+
+    /* ── Delivery animation ────────────────────────────────────── */
+    function startDelivery() {
+      const overlay = document.getElementById("deliveryOverlay");
+      overlay.classList.add("active");
+      document.getElementById("deliveryText").textContent = "📬   SENDING YOUR LETTER...   📬";
+      // Reset postman position
+      const pm = document.getElementById("postmanEl");
+      pm.style.animation = "none";
+      pm.offsetHeight; // reflow
+      pm.style.animation = "";
+      // Reset envelope
+      const env = document.getElementById("flyingEnv");
+      env.style.animation = "none";
+      env.offsetHeight;
+      env.style.animation = "";
+      // Leg walking animation
+      startWalk();
+    }
+
+    let walkInterval = null;
+    function startWalk() {
+      let frame = 0;
+      const legL = document.getElementById("legL");
+      const legR = document.getElementById("legR");
+      walkInterval = setInterval(() => {
+        frame++;
+        if (legL && legR) {
+          legL.setAttribute("transform", frame % 2 === 0 ? "rotate(15,19,54)" : "rotate(-15,19,54)");
+          legR.setAttribute("transform", frame % 2 === 0 ? "rotate(-15,29,54)" : "rotate(15,29,54)");
+        }
+      }, 200);
+      setTimeout(() => { clearInterval(walkInterval); if (legL) legL.removeAttribute("transform"); if (legR) legR.removeAttribute("transform"); }, 3400);
+    }
+
+    function finishDelivery(success, errMsg) {
+      // Wait for postman to arrive (3.4s walk + 0.4s delay = ~3.8s) then show result
+      setTimeout(() => {
+        clearInterval(walkInterval);
+        if (success) {
+          document.getElementById("deliveryText").textContent = "✅   LETTER DELIVERED!   🎉";
+        } else {
+          document.getElementById("deliveryText").textContent = "⚠   SEND FAILED — Check Firebase!";
+        }
+        // Wait a beat, then close overlay
+        setTimeout(() => {
+          document.getElementById("deliveryOverlay").classList.remove("active");
+          if (success) {
+            document.getElementById("formBody").style.display = "none";
+            document.getElementById("successBox").classList.add("show");
+          } else {
+            const btn = document.getElementById("sendBtn");
+            btn.disabled = false;
+            btn.innerHTML = '<span style="font-size:18px;">📮</span><span>SEND LETTER</span>';
+            showToast("⚠ Could not send — check Firebase config!", true);
+          }
+        }, 1600);
+      }, 4000);
+    }
+
+    /* ── Toast ─────────────────────────────────────────────────── */
+    window.showToast = function (msg, err) {
+      const t = document.getElementById("toastEl");
+      t.textContent = msg;
+      t.className = "toast" + (err ? " err" : "") + " show";
+      setTimeout(() => t.classList.remove("show"), 3500);
+    };
+
+    /* ── Stars ─────────────────────────────────────────────────── */
+    (function spawnStars() {
+      const layer = document.getElementById("starsLayer");
+      const sizes = [2, 2, 2, 4, 4, 6];
+      for (let i = 0; i < 80; i++) {
+        const s = document.createElement("div");
+        const sz = sizes[Math.floor(Math.random() * sizes.length)];
+        s.className = "star";
+        s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random() * 100}%;left:${Math.random() * 100}%;--dur:${1.5 + Math.random() * 3}s;--del:${Math.random() * 4}s;`;
+        layer.appendChild(s);
+      }
+    })();
+
+    /* ── Falling leaves ─────────────────────────────────────────── */
+    (function spawnLeaves() {
+      const layer = document.getElementById("leavesLayer");
+      const icons = ["🍂", "🍁", "🌿", "🍃", "🌾", "✨"];
+      function addLeaf() {
+        const l = document.createElement("div");
+        l.className = "leaf";
+        l.textContent = icons[Math.floor(Math.random() * icons.length)];
+        l.style.cssText = `left:${Math.random() * 100}vw;font-size:${10 + Math.random() * 12}px;--dur:${6 + Math.random() * 8}s;--del:${Math.random() * 2}s;`;
+        layer.appendChild(l);
+        setTimeout(() => l.remove(), 16000);
+      }
+      for (let i = 0; i < 12; i++) setTimeout(addLeaf, i * 600);
+      setInterval(addLeaf, 700);
+    })();
+
+  </script>
+</body>
+
+</html>
