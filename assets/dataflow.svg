@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="800" height="300">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgData" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a202c" />
+      <stop offset="100%" stop-color="#2d3748" />
+    </linearGradient>
+
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <marker id="arrowData" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#edf2f7" />
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="300" fill="url(#bgData)" rx="8" />
+  
+  <text x="400" y="40" font-family="sans-serif" font-size="20" font-weight="bold" fill="#f7fafc" text-anchor="middle">Form Submission Dataflow Lifecycle</text>
+
+  <!-- Node 1: User Input -->
+  <g transform="translate(40, 120)">
+    <circle cx="50" cy="40" r="40" fill="#4fd1c5" filter="url(#glow)" />
+    <text x="50" y="35" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1a202c" text-anchor="middle">1. User</text>
+    <text x="50" y="50" font-family="sans-serif" font-size="10" fill="#1a202c" text-anchor="middle">Fills Form</text>
+  </g>
+
+  <!-- Node 2: Validation -->
+  <g transform="translate(200, 120)">
+    <rect width="100" height="80" fill="#ecc94b" rx="8" filter="url(#glow)" />
+    <text x="50" y="35" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1a202c" text-anchor="middle">2. Validation</text>
+    <text x="50" y="50" font-family="sans-serif" font-size="10" fill="#1a202c" text-anchor="middle">Regex / Char</text>
+    <text x="50" y="65" font-family="sans-serif" font-size="10" fill="#1a202c" text-anchor="middle">Limits (JS)</text>
+  </g>
+
+  <!-- Node 3: Database -->
+  <g transform="translate(360, 120)">
+    <rect width="100" height="80" fill="#f6ad55" rx="8" filter="url(#glow)" />
+    <text x="50" y="35" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1a202c" text-anchor="middle">3. Firestore</text>
+    <text x="50" y="50" font-family="sans-serif" font-size="10" fill="#1a202c" text-anchor="middle">Rules Guard</text>
+    <text x="50" y="65" font-family="sans-serif" font-size="10" fill="#1a202c" text-anchor="middle">Secure Write</text>
+  </g>
+
+  <!-- Node 4: Webhook -->
+  <g transform="translate(520, 120)">
+    <rect width="100" height="80" fill="#9f7aea" rx="8" filter="url(#glow)" />
+    <text x="50" y="35" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1a202c" text-anchor="middle">4. Make.com</text>
+    <text x="50" y="50" font-family="sans-serif" font-size="10" fill="#1a202c" text-anchor="middle">Webhook on</text>
+    <text x="50" y="65" font-family="sans-serif" font-size="10" fill="#1a202c" text-anchor="middle">CreateDoc</text>
+  </g>
+
+  <!-- Node 5: Destination -->
+  <g transform="translate(680, 120)">
+    <circle cx="50" cy="40" r="40" fill="#63b3ed" filter="url(#glow)" />
+    <text x="50" y="35" font-family="sans-serif" font-size="12" font-weight="bold" fill="#1a202c" text-anchor="middle">5. Telegram</text>
+    <text x="50" y="50" font-family="sans-serif" font-size="10" fill="#1a202c" text-anchor="middle">Push Alert</text>
+  </g>
+
+  <!-- Connectors -->
+  <path d="M 140 160 L 190 160" stroke="#edf2f7" stroke-width="3" marker-end="url(#arrowData)" />
+  <path d="M 310 160 L 350 160" stroke="#edf2f7" stroke-width="3" marker-end="url(#arrowData)" />
+  <path d="M 470 160 L 510 160" stroke="#edf2f7" stroke-width="3" marker-end="url(#arrowData)" />
+  <path d="M 630 160 L 670 160" stroke="#edf2f7" stroke-width="3" marker-end="url(#arrowData)" />
+  
+  <!-- Subtext explaining fail path -->
+  <path d="M 250 210 L 250 250 L 90 250 L 90 210" fill="none" stroke="#fc8181" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrowData)" />
+  <text x="170" y="240" font-family="sans-serif" font-size="10" fill="#fc8181" text-anchor="middle">Errors shown to User</text>
+
+  <path d="M 410 210 L 410 270 L 90 270 L 90 210" fill="none" stroke="#fc8181" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrowData)" />
+  <text x="250" y="260" font-family="sans-serif" font-size="10" fill="#fc8181" text-anchor="middle">Security Rules Reject -> Error UI</text>
+
+</svg>

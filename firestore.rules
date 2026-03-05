@@ -40,9 +40,19 @@ service cloud.firestore {
         // No extra fields allowed beyond the known set
         && request.resource.data.keys().hasOnly(['name', 'message', 'uid', 'read', 'createdAt', 'category', 'contact']);
 
-      // DENY all reads, updates, and deletes from the client.
-      // Only the Firebase Admin SDK (your server / console) can read letters.
-      allow read, update, delete: if false;
+      // ADMIN READ: Only authenticated admin can read letters.
+      allow read: if request.auth != null
+        && request.auth.token.email == "valleypostoffice@admin.com";
+
+      // ADMIN UPDATE: Only admin can mark letters as read.
+      allow update: if request.auth != null
+        && request.auth.token.email == "valleypostoffice@admin.com"
+        // Only the 'read' field can be changed
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read'])
+        && request.resource.data.read is bool;
+
+      // DENY deletes from the client.
+      allow delete: if false;
     }
 
     // ── Deny everything else by default ──────────────────────

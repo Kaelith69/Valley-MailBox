@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Valley Post Office — Admin</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --sdv-parch: #fdedc4;
+            --sdv-parch-dark: #e6c891;
+            --sdv-parch-deep: #cc9959;
+            --sdv-ink: #3a2010;
+            --sdv-brown1: #6b3a1f;
+            --sdv-brown2: #8b5530;
+            --sdv-brown3: #b87840;
+            --sdv-gold: #f0c050;
+            --sdv-gold-dark: #c08030;
+            --sdv-border: #422811;
+            --sdv-border-inset: #ffeccc;
+            --sdv-red: #d13030;
+            --sdv-green: #5aac2c;
+            --fp: "Press Start 2P", monospace;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--fp);
+            background: #1a0e05;
+            min-height: 100vh;
+            image-rendering: pixelated;
+            -webkit-font-smoothing: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--sdv-ink);
+        }
+
+        /* ═══════════════════════════════════════════
+       LOGIN GATE
+    ═══════════════════════════════════════════ */
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: linear-gradient(180deg, #2a1a3a 0%, #4a2a50 20%, #8a3a2a 50%, #c46030 70%, #e8903a 85%, #f4c060 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity .5s ease;
+        }
+
+        .login-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .login-box {
+            background: var(--sdv-parch);
+            border: 6px solid var(--sdv-border);
+            border-radius: 4px;
+            box-shadow: inset 4px 4px 0 var(--sdv-border-inset), inset -4px -4px 0 var(--sdv-parch-dark), 6px 6px 0 rgba(0, 0, 0, 0.5);
+            padding: 0;
+            width: 90%;
+            max-width: 400px;
+            animation: dialogRise .5s cubic-bezier(.22, .68, 0, 1.2) both;
+        }
+
+        .login-header {
+            background: var(--sdv-brown2);
+            border: 4px solid var(--sdv-border);
+            box-shadow: inset 4px 4px 0 var(--sdv-brown3), inset -4px -4px 0 var(--sdv-brown1);
+            margin: 16px 20px 0;
+            padding: 14px 16px;
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 10px;
+            color: var(--sdv-gold);
+            text-shadow: 2px 2px 0 var(--sdv-border);
+            letter-spacing: 2px;
+        }
+
+        .login-header p {
+            font-size: 6px;
+            color: var(--sdv-parch);
+            margin-top: 8px;
+            opacity: .8;
+        }
+
+        .login-body {
+            padding: 24px 24px 28px;
+        }
+
+        .login-field {
+            margin-bottom: 16px;
+        }
+
+        .login-field label {
+            display: block;
+            font-size: 7px;
+            color: var(--sdv-brown1);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .login-field input {
+            width: 100%;
+            font-family: var(--fp);
+            font-size: 8px;
+            color: var(--sdv-ink);
+            background: #f4dca6;
+            border: 4px solid var(--sdv-border);
+            padding: 10px 12px;
+            outline: none;
+            box-shadow: inset 4px 4px 0 rgba(0, 0, 0, 0.1), inset -4px -4px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .login-field input:focus {
+            background: #fff8e8;
+            box-shadow: inset 4px 4px 0 rgba(0, 0, 0, 0.1), inset -4px -4px 0 rgba(255, 255, 255, 0.4),
+                0 0 0 4px var(--sdv-gold), 0 0 0 8px rgba(240, 192, 80, 0.3);
+        }
+
+        .login-btn {
+            width: 100%;
+            font-family: var(--fp);
+            font-size: 9px;
+            background: var(--sdv-brown2);
+            color: var(--sdv-parch);
+            text-shadow: 2px 2px 0 var(--sdv-border);
+            border: 4px solid var(--sdv-border);
+            padding: 14px;
+            cursor: pointer;
+            box-shadow: inset 4px 4px 0 var(--sdv-brown3), inset -4px -4px 0 var(--sdv-brown1),
+                0 6px 0 var(--sdv-border);
+            letter-spacing: 1px;
+            transition: transform 0.05s;
+        }
+
+        .login-btn:active {
+            transform: translateY(4px);
+            box-shadow: inset 4px 4px 0 var(--sdv-brown1), inset -4px -4px 0 var(--sdv-brown3),
+                0 2px 0 var(--sdv-border);
+        }
+
+        .login-btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
+        .login-error {
+            font-size: 6px;
+            color: var(--sdv-red);
+            margin-top: 12px;
+            text-align: center;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        /* ═══════════════════════════════════════════
+       ADMIN DASHBOARD
+    ═══════════════════════════════════════════ */
+        .admin-wrap {
+            width: 100%;
+            max-width: 900px;
+            padding: 20px 16px 60px;
+            display: none;
+        }
+
+        .admin-wrap.visible {
+            display: block;
+        }
+
+        /* Top Bar */
+        .admin-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--sdv-brown2);
+            border: 4px solid var(--sdv-border);
+            box-shadow: inset 4px 4px 0 var(--sdv-brown3), inset -4px -4px 0 var(--sdv-brown1);
+            padding: 12px 16px;
+            margin-bottom: 20px;
+        }
+
+        .admin-topbar h1 {
+            font-size: 9px;
+            color: var(--sdv-gold);
+            text-shadow: 2px 2px 0 var(--sdv-border);
+            letter-spacing: 2px;
+        }
+
+        .admin-topbar .stats {
+            font-size: 7px;
+            color: var(--sdv-parch);
+        }
+
+        .logout-btn {
+            font-family: var(--fp);
+            font-size: 7px;
+            background: var(--sdv-red);
+            color: #fff;
+            border: 3px solid #8b1a1a;
+            padding: 6px 12px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            box-shadow: inset 2px 2px 0 #e04040, inset -2px -2px 0 #8b1a1a;
+        }
+
+        .logout-btn:active {
+            transform: translateY(2px);
+        }
+
+        /* Filters */
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .filter-btn {
+            font-family: var(--fp);
+            font-size: 6px;
+            background: var(--sdv-parch-dark);
+            color: var(--sdv-ink);
+            border: 3px solid var(--sdv-border);
+            padding: 6px 10px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.4), inset -2px -2px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-btn.active {
+            background: var(--sdv-gold);
+            color: var(--sdv-border);
+        }
+
+        /* Letter Cards */
+        .letters-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .letter-card {
+            background: var(--sdv-parch);
+            border: 4px solid var(--sdv-border);
+            border-radius: 4px;
+            box-shadow: inset 3px 3px 0 var(--sdv-border-inset), inset -3px -3px 0 var(--sdv-parch-dark),
+                4px 4px 0 rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            transition: transform 0.1s;
+        }
+
+        .letter-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .letter-card.unread {
+            border-color: var(--sdv-gold-dark);
+        }
+
+        .letter-card.unread .letter-card__header {
+            background: var(--sdv-gold);
+        }
+
+        .letter-card__header {
+            background: var(--sdv-parch-dark);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid var(--sdv-border);
+            gap: 8px;
+        }
+
+        .letter-card__from {
+            font-size: 8px;
+            color: var(--sdv-ink);
+            flex: 1;
+        }
+
+        .letter-card__badge {
+            font-size: 6px;
+            background: var(--sdv-brown2);
+            color: var(--sdv-parch);
+            padding: 3px 8px;
+            border: 2px solid var(--sdv-border);
+            white-space: nowrap;
+        }
+
+        .letter-card__time {
+            font-size: 5px;
+            color: var(--sdv-brown2);
+            white-space: nowrap;
+        }
+
+        .letter-card__body {
+            padding: 14px;
+        }
+
+        .letter-card__message {
+            font-size: 7px;
+            line-height: 2;
+            color: var(--sdv-ink);
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .letter-card__footer {
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 2px solid var(--sdv-parch-deep);
+            font-size: 6px;
+            color: var(--sdv-brown2);
+        }
+
+        .letter-card__contact {
+            color: var(--sdv-brown1);
+        }
+
+        .mark-read-btn {
+            font-family: var(--fp);
+            font-size: 6px;
+            background: var(--sdv-green);
+            color: #fff;
+            border: 2px solid #2e6014;
+            padding: 4px 8px;
+            cursor: pointer;
+            box-shadow: inset 2px 2px 0 #70c440;
+        }
+
+        .mark-read-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--sdv-brown2);
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state p {
+            font-size: 8px;
+            line-height: 2;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 8px;
+            color: var(--sdv-gold);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: .4;
+            }
+        }
+
+        @keyframes dialogRise {
+            from {
+                opacity: 0;
+                transform: translateY(24px) scale(.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .admin-topbar {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .letter-card__header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════
+       LOGIN OVERLAY
+  ═══════════════════════════════════════════ -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>🔒 ADMIN LOGIN</h1>
+                <p>Valley Post Office — Private Access</p>
+            </div>
+            <div class="login-body">
+                <div class="login-field">
+                    <label>ADMIN EMAIL</label>
+                    <input type="email" id="adminEmail" placeholder="Your admin email..." autocomplete="email" />
+                </div>
+                <div class="login-field">
+                    <label>PASSWORD</label>
+                    <input type="password" id="adminPass" placeholder="Secret password..."
+                        autocomplete="current-password" />
+                </div>
+                <button class="login-btn" id="loginBtn" onclick="handleLogin()">🗝️ ENTER POST OFFICE</button>
+                <p class="login-error" id="loginError"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+       ADMIN DASHBOARD
+  ═══════════════════════════════════════════ -->
+    <div class="admin-wrap" id="adminWrap">
+        <div class="admin-topbar">
+            <h1>📬 VALLEY POST OFFICE</h1>
+            <span class="stats" id="statsText">Loading...</span>
+            <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
+        </div>
+
+        <div class="filter-bar" id="filterBar">
+            <button class="filter-btn active" onclick="filterLetters('all', this)">ALL</button>
+            <button class="filter-btn" onclick="filterLetters('unread', this)">📩 UNREAD</button>
+            <button class="filter-btn" onclick="filterLetters('read', this)">✅ READ</button>
+            <button class="filter-btn" onclick="filterLetters('Question', this)">❓ Question</button>
+            <button class="filter-btn" onclick="filterLetters('Feedback', this)">💬 Feedback</button>
+            <button class="filter-btn" onclick="filterLetters('Bug Report', this)">🐛 Bug</button>
+            <button class="filter-btn" onclick="filterLetters('Collab', this)">🤝 Collab</button>
+            <button class="filter-btn" onclick="filterLetters('Suggestion', this)">💡 Suggest</button>
+        </div>
+
+        <div class="letters-container" id="lettersContainer">
+            <div class="loading" id="loadingIndicator">📮 Loading letters from the valley...</div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy, doc, updateDoc }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2mtAuuQ3pMz_rCoUKKM0tpqedEcY_m9JY",
+            authDomain: "valley-mail.firebaseapp.com",
+            projectId: "valley-mail",
+            storageBucket: "valley-mail.firebasestorage.app",
+            messagingSenderId: "663200969338",
+            appId: "1:663200969338:web:386a3d7da472a2f294c1c3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let allLetters = [];
+
+        // ── Auth State ─────────────────────────────────
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById("loginOverlay").classList.add("hidden");
+                document.getElementById("adminWrap").classList.add("visible");
+                await loadLetters();
+            } else {
+                document.getElementById("loginOverlay").classList.remove("hidden");
+                document.getElementById("adminWrap").classList.remove("visible");
+            }
+        });
+
+        // ── Login Handler ──────────────────────────────
+        window.handleLogin = async function () {
+            const email = document.getElementById("adminEmail").value.trim();
+            const pass = document.getElementById("adminPass").value;
+            const errEl = document.getElementById("loginError");
+            const btn = document.getElementById("loginBtn");
+
+            if (!email || !pass) {
+                errEl.textContent = "⚠️ Please fill in both fields!";
+                errEl.classList.add("show");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = "🔑 AUTHENTICATING...";
+            errEl.classList.remove("show");
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (e) {
+                console.error(e);
+                let msg = "❌ Login failed!";
+                if (e.code === "auth/user-not-found" || e.code === "auth/invalid-credential") {
+                    msg = "❌ Invalid credentials. Access denied.";
+                } else if (e.code === "auth/wrong-password") {
+                    msg = "❌ Wrong password!";
+                } else if (e.code === "auth/too-many-requests") {
+                    msg = "⏳ Too many attempts. Wait a moment.";
+                }
+                errEl.textContent = msg;
+                errEl.classList.add("show");
+            }
+
+            btn.disabled = false;
+            btn.textContent = "🗝️ ENTER POST OFFICE";
+        };
+
+        // ── Logout Handler ─────────────────────────────
+        window.handleLogout = async function () {
+            await signOut(auth);
+        };
+
+        // ── Load Letters ───────────────────────────────
+        async function loadLetters() {
+            const container = document.getElementById("lettersContainer");
+            const loading = document.getElementById("loadingIndicator");
+            loading.style.display = "block";
+
+            try {
+                const q = query(collection(db, "valley_letters"), orderBy("createdAt", "desc"));
+                const snap = await getDocs(q);
+
+                allLetters = [];
+                snap.forEach((docSnap) => {
+                    allLetters.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                updateStats();
+                renderLetters(allLetters);
+            } catch (err) {
+                console.error("Failed to load letters:", err);
+                container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">⚠️</div>
+            <p>Failed to load letters.<br/>Check your permissions.<br/><br/>Error: ${err.message}</p>
+          </div>`;
+            }
+            loading.style.display = "none";
+        }
+
+        // ── Render Letters ─────────────────────────────
+        function renderLetters(letters) {
+            const container = document.getElementById("lettersContainer");
+
+            if (letters.length === 0) {
+                container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">📭</div>
+            <p>No letters found.<br/>The mailbox is empty, farmer!</p>
+          </div>`;
+                return;
+            }
+
+            container.innerHTML = letters.map((l) => {
+                const isUnread = !l.read;
+                const date = l.createdAt?.toDate ? l.createdAt.toDate().toLocaleString() : "Unknown date";
+                const contact = l.contact ? `📧 ${l.contact}` : "No contact provided";
+
+                return `
+          <div class="letter-card ${isUnread ? 'unread' : ''}" id="card-${l.id}">
+            <div class="letter-card__header">
+              <span class="letter-card__from">👤 ${escapeHtml(l.name)}</span>
+              <span class="letter-card__badge">${escapeHtml(l.category || 'Letter')}</span>
+              <span class="letter-card__time">🕐 ${date}</span>
+            </div>
+            <div class="letter-card__body">
+              <div class="letter-card__message">${escapeHtml(l.message)}</div>
+            </div>
+            <div class="letter-card__footer">
+              <span class="letter-card__contact">${escapeHtml(contact)}</span>
+              ${isUnread ? `<button class="mark-read-btn" onclick="markAsRead('${l.id}')">✅ Mark Read</button>` : '<span style="color:var(--sdv-green)">✅ Read</span>'}
+            </div>
+          </div>`;
+            }).join("");
+        }
+
+        // ── Mark as Read ───────────────────────────────
+        window.markAsRead = async function (letterId) {
+            try {
+                await updateDoc(doc(db, "valley_letters", letterId), { read: true });
+                // update local state
+                const letter = allLetters.find((l) => l.id === letterId);
+                if (letter) letter.read = true;
+                updateStats();
+                renderLetters(getFilteredLetters());
+            } catch (err) {
+                console.error("Failed to mark as read:", err);
+                alert("Failed to update letter. Check permissions.");
+            }
+        };
+
+        // ── Filtering ──────────────────────────────────
+        let currentFilter = "all";
+
+        window.filterLetters = function (filter, btnEl) {
+            currentFilter = filter;
+            document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+            btnEl.classList.add("active");
+            renderLetters(getFilteredLetters());
+        };
+
+        function getFilteredLetters() {
+            if (currentFilter === "all") return allLetters;
+            if (currentFilter === "unread") return allLetters.filter((l) => !l.read);
+            if (currentFilter === "read") return allLetters.filter((l) => l.read);
+            return allLetters.filter((l) => l.category === currentFilter);
+        }
+
+        // ── Stats ──────────────────────────────────────
+        function updateStats() {
+            const total = allLetters.length;
+            const unread = allLetters.filter((l) => !l.read).length;
+            document.getElementById("statsText").textContent =
+                `${total} letters · ${unread} unread`;
+        }
+
+        // ── Escape HTML ────────────────────────────────
+        function escapeHtml(str) {
+            if (!str) return "";
+            const d = document.createElement("div");
+            d.appendChild(document.createTextNode(str));
+            return d.innerHTML;
+        }
+
+        // Allow Enter key on password field
+        document.getElementById("adminPass")?.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") handleLogin();
+        });
+    </script>
+
+</body>
+
+</html>
