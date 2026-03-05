@@ -576,6 +576,16 @@
     .sdv-input::placeholder {
       color: rgba(90, 50, 20, .4);
       font-size: 6px;
+      line-height: 1.6;
+    }
+
+    /* Custom pixel arrow for select */
+    select.sdv-input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0h2v2h2v2h2v-2h2v-2h2v6h-10z' fill='none'/%3E%3Cpath d='M0 0h10l-2 2h-6l-2-2zM2 2h6l-2 2h-2l-2-2zM4 4h2l-1 2h0l-1-2z' fill='%238b5530'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: calc(100% - 16px) center;
+      background-size: 10px 6px;
+      padding-right: 40px;
     }
 
     .sdv-textarea {
@@ -1101,9 +1111,10 @@
     .sdv-footer {
       margin-top: 28px;
       font-size: 6px;
-      color: rgba(245, 230, 200, .35);
+      color: rgba(245, 230, 200, .6);
       text-align: center;
       letter-spacing: 2px;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
     }
 
     /* ================================================================
